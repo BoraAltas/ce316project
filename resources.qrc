@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qt/qml">
+        <file>src/qml/mainWindow.qml</file>
+    </qresource>
+</RCC>

@@ -10,9 +10,9 @@ set(CMAKE_AUTORCC ON)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Gui)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.9)
 
 set(PROJECT_SOURCES src/main.cpp)
 
@@ -20,11 +20,12 @@ qt_add_qml_module(MainWindowQml
         URI MainWindow
         VERSION 1.0
         QML_FILES
-        src/mainWindow.qml
+            src/qml/mainWindow.qml
 )
 
 qt_add_executable(MainWindow
         ${PROJECT_SOURCES}
+        resources.qrc
 )
 
 target_link_libraries(MainWindow
