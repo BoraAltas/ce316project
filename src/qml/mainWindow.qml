@@ -53,7 +53,8 @@ ApplicationWindow { // Main app window
             anchors.leftMargin: 10
             anchors.rightMargin: 100
 
-            onClicked: Qt.quit() //TODO, will be bounded to cpp code using signals or Q_INVOKABLE
+            onClicked:
+                Qt.quit() //TODO, will be bounded to cpp code using signals or Q_INVOKABLE
         }
 
         Button {
@@ -67,6 +68,33 @@ ApplicationWindow { // Main app window
             onClicked: Qt.quit() //TODO
         }
     }
+
+
+    Button {
+        text: "Open File"
+
+        // Position the button at the top-left corner with margin
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.leftMargin: 50
+        anchors.topMargin: 50
+
+        z: 10  // Ensure the button is on top of other components
+
+        onClicked: {
+            fileDialogHelper.openFileDialog()
+        }
+    }
+
+
+
+    // Label to show the selected file path
+    Label {
+        text: fileDialogHelper.selectedFile
+        anchors.top: parent.top
+        anchors.topMargin: 50
+    }
+
 
     Rectangle { // Rest of the window
         id: mainView
