@@ -4,13 +4,22 @@
 
 #include "filedialoghelper.h"
 #include <QFileDialog>
+#include <QDebug>
 
 FileDialogHelper::FileDialogHelper(QObject *parent) : QObject(parent) {}
 
 void FileDialogHelper::openFileDialog() {
-    QString file = QFileDialog::getOpenFileName(nullptr, "Dosya Seç", "", "Tüm Dosyalar (*.*)");
+    QString file = QFileDialog::getOpenFileName(nullptr, "Select a Zip File", "", tr("ZIP Archives (*.zip)"));
+
     if (!file.isEmpty()) {
         m_selectedFile = file;
+
+        if (m_selectedFile.endsWith(".zip", Qt::CaseInsensitive)) {
+            qDebug() << "zip file" << m_selectedFile;
+        } else {
+            qDebug() << "not a zip file" << m_selectedFile;
+        }
+
         emit selectedFileChanged();
     }
 }
@@ -18,4 +27,3 @@ void FileDialogHelper::openFileDialog() {
 QString FileDialogHelper::selectedFile() const {
     return m_selectedFile;
 }
-
