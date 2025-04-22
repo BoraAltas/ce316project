@@ -15,8 +15,8 @@ find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Widgets)  # Add Widgets 
 qt_standard_project_setup(REQUIRES 6.9)
 
 set(PROJECT_SOURCES src/main.cpp
-        src/qml/filedialoghelper.cpp
-        src/qml/filedialoghelper.h)
+        src/filedialoghelper.cpp
+        src/filedialoghelper.h)
 
 qt_add_qml_module(MainWindowQml
         URI MainWindow

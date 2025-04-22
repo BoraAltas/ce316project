@@ -22,6 +22,8 @@ public:
 
 private:
     QString m_selectedFile;
+
+    void unzipFile();
 };
 
 #endif // FILEDIALOGHELPER_H

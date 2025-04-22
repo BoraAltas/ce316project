@@ -1,8 +1,8 @@
-#include "qml/filedialoghelper.h"
-#include <QApplication>  // Use QApplication instead of QGuiApplication
+#include "filedialoghelper.h"
+#include <QApplication> // Use QApplication instead of QGuiApplication
+#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QGuiApplication>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);  // Switch to QApplication
