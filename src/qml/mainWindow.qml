@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtCore
 
+import iae
+
 ApplicationWindow { // Main app window
     id: mainWindow
     visible: true
@@ -53,7 +55,7 @@ ApplicationWindow { // Main app window
             anchors.leftMargin: 10
             anchors.rightMargin: 100
 
-            onClicked: Qt.quit() //TODO, will be bounded to cpp code using signals or Q_INVOKABLE
+            onClicked: iae.setStatus("boom")
         }
 
         Button {

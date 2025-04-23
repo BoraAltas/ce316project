@@ -14,23 +14,32 @@ find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
 
 qt_standard_project_setup(REQUIRES 6.9)
 
-set(PROJECT_SOURCES src/main.cpp)
+set(PROJECT_SOURCES
+        src/main.cpp
+        src/iae.cpp
+        src/iae.h
+        src/sourceCodeHandler.cpp
+        src/sourceCodeHandler.h
+        src/project.cpp
+        src/project.h
+        src/student.cpp
+        src/student.h)
 
-qt_add_qml_module(MainWindowQml
-        URI MainWindow
+qt_add_qml_module(iaeQml
+        URI iae
         VERSION 1.0
         QML_FILES
-            src/qml/mainWindow.qml
+        src/qml/mainWindow.qml
 )
 
-qt_add_executable(MainWindow
+qt_add_executable(iae
         ${PROJECT_SOURCES}
         resources.qrc
 )
 
-target_link_libraries(MainWindow
+target_link_libraries(iae
         PRIVATE
-        MainWindowQml
+        iaeQml
         Qt6::Quick
         Qt6::Gui
         Qt6::Core
