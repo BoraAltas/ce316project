@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>src/qml/mainWindow.qml</file>
+        <file>src/qml/CreateNewConfiguration.qml</file>
+        <file>src/iae.cpp</file>
+        <file>src/iae.h</file>
     </qresource>
 </RCC>

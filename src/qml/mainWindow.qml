@@ -1,121 +1,168 @@
-import QtQuick
-import QtQuick.Controls
-import QtCore
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 import iae
 
-ApplicationWindow { // Main app window
-    id: mainWindow
+ApplicationWindow {
     visible: true
-    title: "Ce316 Project" //TODO: Find a better name
+    width: 1000
+    height: 700
+    title: "CompileX"
+    color: "#f5f5f5"
 
-    // save/reload the window size
-    width: settings.width
-    height: settings.height
+    CreateNewConfiguration {
+        id: createConfigDialog
+        CreateNewConfiguration{}
 
-    minimumHeight: 450
-    minimumWidth: 700
-
-    Settings { //window size and maximized state, other settings can be added here, also saved onClosing()
-        id: settings
-
-        property bool maximized
-        property alias height: mainWindow.height
-        property alias width: mainWindow.width
     }
 
-    Rectangle { // Top bar
-        id: topBar
-
-        color: "lightgrey"
-        border.color: "black"
-        border.width: 2
-
-        anchors.left: parent.left // Size and alignment, parent is mainWindow
-        anchors.right: parent.right // because it is created inside that component
-        height: 50
-        width: parent.width
-
-        Button {
-            text: "Configure"
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
-
-            onClicked: Qt.quit() //TODO, will be bounded to cpp code using signals or Q_INVOKABLE
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            MenuItem { text: "New Project" }
+            MenuItem { text: "Save Project" }
+            MenuItem { text: "Exit" }
         }
 
-        Button {
-            text: "Import"
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-
-            anchors.leftMargin: 10
-            anchors.rightMargin: 100
-
-            onClicked: iae.setStatus("boom")
-        }
-
-        Button {
-            text: "Help"
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-
-            anchors.leftMargin: 10
-            anchors.rightMargin: 10
-
-            onClicked: Qt.quit() //TODO
-        }
-    }
-
-    Rectangle { // Rest of the window
-        id: mainView
-
-        height: parent.height - topBar.height
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        color: "lightblue"
-        border.color: "black"
-        border.width: 2
-
-        Rectangle { // temp
-            id: contentArea
-            anchors.centerIn: parent //center at the parent component
-
-            width: parent.width * 0.9
-            height: parent.height * 0.8
-
-            color: "white"
-            border.color: "black"
-            border.width: 2
-
-            Text {
-                id: contentText
-                anchors.centerIn: parent
-                text: "hoppala"
-                font.pointSize: 20
+        Menu {
+            title: "Configuration"
+            MenuItem {
+                text: "Create New"
+                onTriggered: {
+                    createConfigDialog.open()
+                }
             }
+            MenuItem { text: "Edit Existing" }
+            MenuItem { text: "Remove" }
+            MenuItem { text: "Import" }
+            MenuItem { text: "Export" }
+        }
+
+        Menu {
+            title: "Help"
+            MenuItem { text: "View Manual" }
+            MenuItem { text: "About" }
         }
     }
 
+    // Include CreateNewConfiguration.qml directly
 
-    Component.onCompleted: { // After the creation of the window (MainWindow)
-        if (settings.maximized) {
-            mainWindow.showMaximized();
-        }
-    }
 
-    onClosing: { // Closing of the window, saving screen size and maximization setting
-        if (mainWindow.visibility === Window.Maximized) {
-            settings.maximized = true;
-        } else {
-            settings.maximized = false;
-            settings.height = mainWindow.height;
-            settings.width = mainWindow.width;
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 20
+        color: "transparent"
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
+
+            GroupBox {
+                title: "Project Information"
+                Layout.fillWidth: true
+
+                GridLayout {
+                    columns: 2
+                    rowSpacing: 10
+                    columnSpacing: 20
+                    anchors.fill: parent
+
+                    Label { text: "Project Name:" }
+                    TextField { placeholderText: "Enter project name" }
+
+                    Label { text: "Configuration:" }
+                    ComboBox {
+                        model: ["Select", "C", "C++", "Java", "Python"]
+                    }
+
+                    Label { text: "Student ZIP Directory:" }
+                    TextField { placeholderText: "Choose ZIP directory..." }
+                }
+            }
+
+            GroupBox {
+                title: "Assignment Test Parameters"
+                Layout.fillWidth: true
+
+                GridLayout {
+                    columns: 2
+                    rowSpacing: 10
+                    columnSpacing: 20
+                    anchors.fill: parent
+
+                    Label { text: "Program Arguments:" }
+                    TextField { placeholderText: "e.g. input.txt output.txt" }
+
+                    Label { text: "Expected Output File:" }
+                    TextField { placeholderText: "e.g. expected.txt" }
+                }
+            }
+
+            RowLayout {
+                spacing: 20
+                Layout.alignment: Qt.AlignHCenter
+
+                Button { text: "Run All" }
+                Button { text: "Clear Results" }
+            }
+
+            GroupBox {
+                title: "Projects"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                ColumnLayout {
+                    anchors.fill: parent
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+                        Rectangle {
+                            color: "#dcdcdc"
+                            Layout.preferredWidth: 150
+                            height: 40
+                            border.color: "black"
+                            Text { anchors.centerIn: parent; text: "Project ID" }
+                        }
+                        Rectangle {
+                            color: "#dcdcdc"
+                            Layout.preferredWidth: 788
+                            height: 40
+                            border.color: "black"
+                            Text { anchors.centerIn: parent; text: "Project Name"; }
+                        }
+                    }
+
+                    ListView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        model: ListModel {
+                            ListElement { projectID: "123456"; projectName: "Project A" }
+                            ListElement { projectID: "234567"; projectName: "Project B" }
+                            ListElement { projectID: "345678"; projectName: "Project C" }
+                        }
+
+                        delegate: RowLayout {
+                            spacing: 1
+                            Rectangle {
+                                Layout.preferredWidth: 150
+                                height: 30
+                                color: "white"
+                                border.color: "#cccccc"
+                                Text { anchors.centerIn: parent; text: projectID }
+                            }
+                            Rectangle {
+                                Layout.preferredWidth: 788
+                                height: 30
+                                color: "white"
+                                border.color: "#cccccc"
+                                Text { anchors.centerIn: parent; text: projectName }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

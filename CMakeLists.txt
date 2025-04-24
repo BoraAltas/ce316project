@@ -13,6 +13,8 @@ set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
 
 qt_standard_project_setup(REQUIRES 6.9)
+qt_policy(set QTP0001 NEW)
+qt_policy(set QTP0004 NEW)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -25,11 +27,13 @@ set(PROJECT_SOURCES
         src/student.cpp
         src/student.h)
 
-qt_add_qml_module(iaeQml
+qt_add_qml_module(
+        iaeQml
         URI iae
         VERSION 1.0
         QML_FILES
         src/qml/mainWindow.qml
+        src/qml/CreateNewConfiguration.qml
 )
 
 qt_add_executable(iae
@@ -43,4 +47,5 @@ target_link_libraries(iae
         Qt6::Quick
         Qt6::Gui
         Qt6::Core
+
 )
