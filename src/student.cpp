@@ -5,6 +5,9 @@
 Student::Student(const QString &studentID, const QString &result, const bool success, QObject *parent )
 : QObject(parent), m_studentID(studentID), m_result(result), m_success(success) {}
 
+Student::Student(QObject *parent) // default constructor
+    : QObject(parent), m_studentID(""), m_result(""), m_success(false) {}
+
 QString Student::getStudentID() const {
     return m_studentID;
 }

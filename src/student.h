@@ -13,6 +13,8 @@ class Student final : public QObject { //property and signal usage might be unne
 
 public:
     Student(const QString &studentID, const QString &result, bool success, QObject *parent = nullptr);
+    explicit Student(QObject*parent = nullptr); // default constructor
+
     [[nodiscard]] QString getStudentID()const; // [[nodiscard]] means the caller must use the return value
     [[nodiscard]] QString getResult()const;
     [[nodiscard]] bool isSuccess()const;
@@ -31,8 +33,5 @@ private:
     QString m_result;
     bool m_success;
 };
-
-
-
 
 #endif //STUDENT_H
