@@ -13,14 +13,35 @@ ApplicationWindow {
 
     CreateNewConfiguration {
         id: createConfigDialog
-        CreateNewConfiguration{}
+        onConfigCreated: (configName, language, compilerPath) => {
+            console.log("New config created:");
+            console.log("Name:", configName);
+            console.log("Language:", language);
+            console.log("Compiler:", compilerPath);
+
+        }
+        visible: false
+
+    }
+    NewProject{
+        id:newProjectDialog
+        visible: false
+        onProjectCreated: (name, path) => {
+            console.log("New Project Created:")
+            console.log("Name:", name)
+            console.log("Path:", path)
+        }
 
     }
 
     menuBar: MenuBar {
         Menu {
             title: "File"
-            MenuItem { text: "New Project" }
+            MenuItem { text: "New Project"
+                onTriggered: {
+                    newProjectDialog.visible = true
+                }
+            }
             MenuItem { text: "Save Project" }
             MenuItem { text: "Exit" }
         }
@@ -30,7 +51,7 @@ ApplicationWindow {
             MenuItem {
                 text: "Create New"
                 onTriggered: {
-                    createConfigDialog.open()
+                    createConfigDialog.visible = true
                 }
             }
             MenuItem { text: "Edit Existing" }
@@ -46,7 +67,6 @@ ApplicationWindow {
         }
     }
 
-    // Include CreateNewConfiguration.qml directly
 
 
     Rectangle {

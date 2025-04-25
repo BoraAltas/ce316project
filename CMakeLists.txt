@@ -34,6 +34,7 @@ qt_add_qml_module(
         QML_FILES
         src/qml/mainWindow.qml
         src/qml/CreateNewConfiguration.qml
+        src/qml/NewProject.qml
 )
 
 qt_add_executable(iae

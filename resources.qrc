@@ -4,5 +4,7 @@
         <file>src/qml/CreateNewConfiguration.qml</file>
         <file>src/iae.cpp</file>
         <file>src/iae.h</file>
+        <file>src/qml/NewProject.qml</file>
+
     </qresource>
 </RCC>
