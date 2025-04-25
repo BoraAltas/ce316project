@@ -5,44 +5,70 @@ import QtQuick.Layouts 1.15
 Dialog {
     id: createConfigDialog
     title: "Create New Configuration"
-    width: 400
-    height: 300
-    modal: true  // Makes the dialog modal (blocks interaction with the main window)
+    width: 450
+    height: 350
+    modal: true
+    anchors.centerIn: parent
+
+    signal configCreated(string configName, string language, string compilerPath)
 
     ColumnLayout {
+        anchors.fill: parent
         spacing: 10
-        anchors.centerIn: parent
+        anchors.margins: 50
 
-        TextField {
-            id: configNameField
-            // Text: "Enter Configuration Name"
+        GridLayout {
+            id: formLayout
+            columns: 2
+            columnSpacing: 30
+            rowSpacing: 40
+            Layout.fillWidth: true
+
+            Label { text: "Configuration Name:" }
+            TextField {
+                id: configNameField
+                placeholderText: "e.g. C Assignment Config"
+                Layout.fillWidth: true
+            }
+
+            Label { text: "Language:" }
+            ComboBox {
+                id: languageComboBox
+                model: ["Select", "C", "C++", "Java", "Python"]
+                Layout.fillWidth: true
+            }
+
+            Label { text: "Compiler Path:" }
+            TextField {
+                id: compilerPathField
+                placeholderText: "e.g. C:/MinGW/bin/gcc.exe"
+                Layout.fillWidth: true
+            }
         }
 
-        ComboBox {
-            id: languageComboBox
-            model: ["Select", "C", "C++", "Java", "Python"]
-            // Text: "Select Language"
-        }
-
-        TextField {
-            id: compilerPathField
-            // Text: "Enter Compiler Path"
+        Item {
+            Layout.fillHeight: true
         }
 
         RowLayout {
+            id: buttonRow
+            Layout.alignment: Qt.AlignRight
             spacing: 20
 
             Button {
                 text: "Cancel"
-                onClicked: createConfigDialog.close()  // Close dialog
+                onClicked: createConfigDialog.close()
             }
 
             Button {
                 text: "Create"
                 onClicked: {
-                    // Add logic to save the configuration
-                    console.log("Creating config: ", configNameField.text)
-                    createConfigDialog.close()  // Close dialog after creating
+                    createConfigDialog.configCreated(
+                        configNameField.text,
+                        languageComboBox.currentText,
+                        compilerPathField.text
+                    )
+                    createConfigDialog.close()
                 }
             }
         }
