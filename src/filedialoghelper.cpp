@@ -8,6 +8,9 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <qcoreapplication.h>
+#include <zlib.h>
+#include "unzip.h"
+
 
 FileDialogHelper::FileDialogHelper(QObject *parent) : QObject(parent) {}
 
@@ -51,34 +54,73 @@ void FileDialogHelper::unzipFile() {
     // Log the src directory path to check if it's correct
     qDebug() << "Extracting to:" << srcDir.absolutePath();
 
-    // It uses QProcess to run the unzip command
-    QProcess process;
-    QStringList arguments;
-    // If the file exist before -0 flag will overwirets
-    arguments << "-o" << m_selectedFile << "-d" << srcDir.absolutePath();
+    QString zipFilePath = m_selectedFile;
+    unzFile zipfile = unzOpen(zipFilePath.toStdString().c_str());
 
-    process.start("unzip", arguments);
-    process.waitForFinished();
+    if (zipfile == nullptr) {
+        qDebug() << "Cannot open zip file.";
+        return;
+    }
 
-    // Its captures the process output
-    QString output = process.readAllStandardOutput();
-    QString errorOutput = process.readAllStandardError();
+    unz_global_info global_info;
+    if (unzGetGlobalInfo(zipfile, &global_info) != UNZ_OK) {
+        qDebug() << "Could not read file global info.";
+        unzClose(zipfile);
+        return;
+    }
 
-    if (process.exitStatus() == QProcess::NormalExit) {
-        qDebug() << "Unzip completed successfully.";
-        qDebug() << "Unzip Output:" << output;
+    for (uLong i = 0; i < global_info.number_entry; ++i) {
+        unz_file_info file_info;
+        char filename[256];
 
-        //In mac after unzip "__MACOSX" file would be crated. This block deletes "__MACOSX" if its crated
-        QDir macosxDir(srcDir.absoluteFilePath("__MACOSX"));
-        if (macosxDir.exists()) {
-            macosxDir.removeRecursively();
-            qDebug() << "__MACOSX folder deleted.";
+        if (unzGetCurrentFileInfo(zipfile, &file_info, filename, sizeof(filename), NULL, 0, NULL, 0) != UNZ_OK) {
+            qDebug() << "Could not read file info.";
+            unzClose(zipfile);
+            return;
         }
 
-    } else {
-        qDebug() << "Unzip failed:" << process.errorString();
-        qDebug() << "Error Output:" << errorOutput;
+        QString fullPath = srcDir.absoluteFilePath(QString::fromUtf8(filename));
+
+        if (filename[strlen(filename) - 1] == '/') {
+            // It's a directory
+            QDir().mkpath(fullPath);
+        } else {
+            // It's a file
+            QFile file(fullPath);
+            if (!file.open(QIODevice::WriteOnly)) {
+                qDebug() << "Could not open file for writing:" << fullPath;
+                unzClose(zipfile);
+                return;
+            }
+
+            if (unzOpenCurrentFile(zipfile) != UNZ_OK) {
+                qDebug() << "Could not open current file inside zip.";
+                file.close();
+                unzClose(zipfile);
+                return;
+            }
+
+            char buffer[8192];
+            int readBytes;
+            while ((readBytes = unzReadCurrentFile(zipfile, buffer, sizeof(buffer))) > 0) {
+                file.write(buffer, readBytes);
+            }
+
+            file.close();
+            unzCloseCurrentFile(zipfile);
+        }
+
+        if ((i + 1) < global_info.number_entry) {
+            if (unzGoToNextFile(zipfile) != UNZ_OK) {
+                qDebug() << "Could not go to next file.";
+                unzClose(zipfile);
+                return;
+            }
+        }
     }
+
+    unzClose(zipfile);
+    qDebug() << "Unzip completed successfully.";
 }
 
 

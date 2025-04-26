@@ -10,13 +10,25 @@ set(CMAKE_AUTORCC ON)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Widgets)  # Add Widgets here
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Widgets)
 
 qt_standard_project_setup(REQUIRES 6.9)
 
-set(PROJECT_SOURCES src/main.cpp
+
+add_subdirectory(src/zlib-1.3.1)
+
+
+set(PROJECT_SOURCES
+        src/main.cpp
         src/filedialoghelper.cpp
-        src/filedialoghelper.h)
+        src/filedialoghelper.h
+)
+
+
+set(MINIZIP_SOURCES
+        src/zlib-1.3.1/contrib/minizip/unzip.c
+        src/zlib-1.3.1/contrib/minizip/ioapi.c
+)
 
 qt_add_qml_module(MainWindowQml
         URI MainWindow
@@ -27,7 +39,13 @@ qt_add_qml_module(MainWindowQml
 
 qt_add_executable(MainWindow
         ${PROJECT_SOURCES}
+        ${MINIZIP_SOURCES}
         resources.qrc
+)
+
+target_include_directories(MainWindow
+        PRIVATE
+        src/zlib-1.3.1/contrib/minizip
 )
 
 target_link_libraries(MainWindow
@@ -36,4 +54,6 @@ target_link_libraries(MainWindow
         Qt6::Quick
         Qt6::Gui
         Qt6::Core
-        Qt6::Widgets)  # Add Qt6::Widgets here
+        Qt6::Widgets
+        zlibstatic
+)

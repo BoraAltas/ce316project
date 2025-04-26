@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QString>
+#include <zlib.h>
 
 class FileDialogHelper : public QObject {
     Q_OBJECT
