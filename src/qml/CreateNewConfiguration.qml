@@ -56,12 +56,8 @@ Dialog {
             spacing: 20
 
             Button {
-                text: "Cancel"
-                onClicked: createConfigDialog.close()
-            }
-
-            Button {
                 text: "Create"
+                Layout.preferredWidth: 80
                 onClicked: {
                     createConfigDialog.configCreated(
                         configNameField.text,
@@ -70,6 +66,11 @@ Dialog {
                     )
                     createConfigDialog.close()
                 }
+            }
+            Button {
+                text: "Cancel"
+                Layout.preferredWidth: 80
+                onClicked: createConfigDialog.close()
             }
         }
     }
