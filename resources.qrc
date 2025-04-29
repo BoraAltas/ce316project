@@ -5,6 +5,17 @@
         <file>src/iae.cpp</file>
         <file>src/iae.h</file>
         <file>src/qml/NewProject.qml</file>
+        <file>src/qml/EditExistingConfig.qml</file>
+        <file>src/qml/RemoveConfig.qml</file>
+        <file>src/qml/ImportConfig.qml</file>
+        <file>src/qml/ExportConfig.qml</file>
+        <file>src/qml/images/import.png</file>
+        <file>src/qml/images/export.png</file>
+        <file>src/qml/images/help.png</file>
+
+
+
+
 
     </qresource>
 </RCC>

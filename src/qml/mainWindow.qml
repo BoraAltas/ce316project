@@ -8,7 +8,7 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 700
-    title: "CompileX"
+    title: "AssignCheck"
     color: "#f5f5f5"
 
     CreateNewConfiguration {
@@ -33,6 +33,42 @@ ApplicationWindow {
         }
 
     }
+    EditExistingConfig{
+        id: editConfigDialog
+        onConfigUpdated: (oldName, newName, language, compilerPath) => {
+            console.log("Config updated:");
+            console.log("Old Name:", oldName);
+            console.log("New Name:", newName);
+            console.log("Language:", language);
+            console.log("Compiler Path:", compilerPath);
+        }
+        visible: false
+    }
+    RemoveConfig{
+        id: removeConfigDialog
+        onConfigRemoved: (configName) => {
+            console.log("Removed config:", configName)
+            //  remove from backend
+        }
+        visible: false
+    }
+    ImportConfig{
+        id: importConfigDialog
+        onImportRequested: (filePath) => {
+            console.log("Import requested with file path:", filePath)
+            // call backend later
+        }
+    }
+    ExportConfig {
+        id: exportConfigDialog
+        onExportRequested: (configName, fileName) => {
+            console.log("Export requested:")
+            console.log("Config:", configName)
+            console.log("Save As:", fileName)
+            // call backend save logic
+        }
+    }
+
 
     menuBar: MenuBar {
         Menu {
@@ -42,8 +78,6 @@ ApplicationWindow {
                     newProjectDialog.visible = true
                 }
             }
-            MenuItem { text: "Save Project" }
-            MenuItem { text: "Exit" }
         }
 
         Menu {
@@ -54,16 +88,85 @@ ApplicationWindow {
                     createConfigDialog.visible = true
                 }
             }
-            MenuItem { text: "Edit Existing" }
-            MenuItem { text: "Remove" }
-            MenuItem { text: "Import" }
-            MenuItem { text: "Export" }
+            MenuItem { text: "Edit Existing"
+                onTriggered: {
+                    editConfigDialog.configModel = [
+                        { name: "C Config", language: "C", compilerPath: "C:/MinGW/bin/gcc.exe" },
+                        { name: "Python Conf", language: "Python", compilerPath: "python" }
+                        // fill after
+                    ]
+                    editConfigDialog.visible = true
+                }
+            }
+
+            MenuItem {
+                text: "Remove"
+                onTriggered: {
+                    removeConfigDialog.configModel = [
+                        { name: "C Config", language: "C", compilerPath: "gcc" },
+                        { name: "Python Conf", language: "Python", compilerPath: "python" }
+                    ]
+                    removeConfigDialog.filteredConfigs = removeConfigDialog.allConfigs
+                    removeConfigDialog.visible = true
+                }
+            }
+            MenuItem {
+                onTriggered: importConfigDialog.visible = true
+                contentItem: Row {
+                    spacing: 6
+                    Text {
+                        text: "Import"
+                    }
+                    Image {
+                        source: "qrc:/src/qml/images/import.png"
+                        width: 20; height: 16
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                }
+            }
+            MenuItem {
+                onTriggered: {
+                    exportConfigDialog.configModel = [
+                        { name: "C Config", language: "C", compilerPath: "C:/MinGW/bin/gcc.exe" },
+                        { name: "Python Conf", language: "Python", compilerPath: "python" }
+                        // fill it properly from your real config list
+                    ]
+                    exportConfigDialog.visible = true
+                }
+                contentItem: Row {
+                    spacing: 6
+                    Text {
+                        text: "Export"
+                    }
+                    Image {
+                        source: "qrc:/src/qml/images/export.png"
+                        width: 20; height: 16
+                        fillMode: Image.PreserveAspectFit
+                    }
+                }
+            }
         }
 
         Menu {
             title: "Help"
-            MenuItem { text: "View Manual" }
-            MenuItem { text: "About" }
+           MenuItem {
+               onTriggered: {
+                   helpDialog.open()
+               }
+               contentItem: Row {
+                   spacing: 6
+                   Text {
+                       text: "How to use"
+                   }
+                   Image {
+                       source: "qrc:/src/qml/images/help.png"
+                       width: 20; height: 20
+                       fillMode: Image.PreserveAspectFit
+                   }
+
+               }
+            }
         }
     }
 
@@ -89,15 +192,28 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Project Name:" }
-                    TextField { placeholderText: "Enter project name" }
+                    ComboBox {
+                        id: projectNameComboBox
+                        Layout.preferredWidth: 200
+                        Layout.fillWidth: false
+
+                        model: [
+                            "Project A",
+                            "Project B",
+                            "Project C",
+                        ]
+                    }
 
                     Label { text: "Configuration:" }
                     ComboBox {
+                        Layout.preferredWidth: 200
                         model: ["Select", "C", "C++", "Java", "Python"]
                     }
 
                     Label { text: "Student ZIP Directory:" }
-                    TextField { placeholderText: "Choose ZIP directory..." }
+                    TextField {
+                        Layout.preferredWidth: 200
+                        placeholderText: "Choose ZIP directory..." }
                 }
             }
 
@@ -182,6 +298,55 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
+        }
+    }
+    Dialog {
+        id: helpDialog
+        title: "How to Use AssignCheck"
+        anchors.centerIn: parent
+        modal: true
+        width: 500
+        height: 400
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
+            anchors.margins: 20
+
+            ScrollView {
+                id: scrollArea
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentWidth: scrollArea.width
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                Column {
+                    width: scrollArea.width
+                    spacing: 10
+
+                    Text {
+                        text: "Welcome to AssignCheck!\n\n"
+                            + "1. Create a New Project from the 'File' menu.\n"
+                            + "2. Set a Configuration (like C, C++, Java, or Python).\n"
+                            + "3. Select the Student ZIP Directory.\n"
+                            + "4. Define Program Arguments and Expected Output.\n"
+                            + "5. Press 'Run All' to automatically compile and test assignments.\n"
+                            + "6. You can Create, Edit, Remove, Import or Export configurations under the 'Configuration' menu.\n\n"
+                            + "Good luck!\n\n"
+
+                        wrapMode: Text.Wrap
+                        font.pixelSize: 16
+                        horizontalAlignment: Text.AlignLeft
+                    }
+                }
+            }
+            Button {
+                text: "Close"
+                Layout.alignment: Qt.AlignRight
+                Layout.preferredWidth: 80
+                Layout.preferredHeight: 30
+                onClicked: helpDialog.close()
             }
         }
     }

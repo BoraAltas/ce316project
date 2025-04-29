@@ -1,6 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs 6.2
+
+
 
 Dialog {
     id: newProjectDialog
@@ -10,6 +13,7 @@ Dialog {
     visible: false
     width: 400
     height: 250
+
 
     signal projectCreated(string projectName, string projectPath)
 
@@ -41,8 +45,15 @@ Dialog {
                 id: pathInput
                 text: newProjectDialog.selectedPath
                 onTextChanged: newProjectDialog.selectedPath = text
+                Layout.fillWidth: true
             }
         }
+
+        Button {
+            text: "Browse"
+            onClicked: folderDialog.open()
+        }
+
         Item {
             Layout.fillHeight: true
         }
@@ -50,20 +61,22 @@ Dialog {
             spacing: 20
             Layout.alignment: Qt.AlignRight
             Button {
-                text: "Cancel"
-                onClicked: newProjectDialog.close()
-            }
-            Button {
                 text: "Create"
                 onClicked: {
-                    if (nameInput.text !== "" && selectedPath !== "") {
-                        projectCreated(nameInput.text, selectedPath)
+                    if (nameInput.text.trim() !== "" && selectedPath.trim() !== "") {
+                        projectCreated(nameInput.text.trim(), selectedPath.trim())
                         newProjectDialog.close()
                     } else {
                         console.log("Please fill in both fields.")
                     }
                 }
             }
+            Button {
+                text: "Cancel"
+                onClicked: newProjectDialog.close()
+            }
         }
     }
+  
+
 }
