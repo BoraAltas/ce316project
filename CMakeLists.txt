@@ -25,7 +25,10 @@ set(PROJECT_SOURCES
         src/project.cpp
         src/project.h
         src/student.cpp
-        src/student.h)
+        src/student.h
+        src/qml/SQLite.cpp
+        src/qml/SQLite.h
+)
 
 qt_add_qml_module(
         iaeQml
