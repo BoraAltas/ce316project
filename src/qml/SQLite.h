@@ -12,6 +12,7 @@ class Student;
 class SQLite {
 public:
     static void saveStudents(const QList<Student*>& students);
+    static QList<Student*> loadStudents();
 };
 
 
