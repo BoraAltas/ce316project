@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs
 
 //import iae
 
@@ -241,7 +242,18 @@ ApplicationWindow {
 
                 Button { text: "Run All" }
                 Button { text: "Clear Results" }
+                Button { text: "Open File"
+
+                onClicked: {
+                    zipHandler.openFileDialog()
+                    }
+                }
             }
+            /*Label {
+                text: zipHandler.selectedFile
+                anchors.top: parent.top
+                anchors.topMargin: 50
+            }*/
 
             GroupBox {
                 title: "Projects"

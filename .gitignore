@@ -1,5 +1,40 @@
-build/
-cmake-build-debug/
+# macOS sistem dosyaları
+.DS_Store
 
+# CLion / CMake / Qt build klasörleri
+cmake-build-debug/
+cmake-build-release/
+build/
+out/
+*.pro.user
+Makefile
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Qt generated qrc, moc, and obj files
+*.autosave
+*.moc
+*.obj
+*.o
+*.a
+*.so
+*.dll
+*.exe
+
+# IDE klasörleri
 .idea/
 .vscode/
+
+# Logs
+*.log
+
+# Backup ve geçici dosyalar
+*~
+*.swp
+*.bak
+
+# Qt Creator dosyaları
+*.pro.user.*
+*.qbs.user.*
+*.qmake.stash
