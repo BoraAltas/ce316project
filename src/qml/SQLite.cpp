@@ -1,5 +1,6 @@
 #include "SQLite.h"
 #include "student.h"
+#include "project.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -53,5 +54,81 @@ QList<Student*> SQLite::loadStudents() {
 
     qDebug() << "Loaded" << studentList.size() << "students from database.";
     return studentList;
+}
+void SQLite::saveProjects(const QList<Project*>& projects) {
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qWarning() << "Database not open in saveProjects.";
+        return;
+    }
+
+    for (Project* project : projects) {
+        QSqlQuery insertProject;
+        insertProject.prepare("INSERT INTO Projects (name) VALUES (:name)");
+        insertProject.bindValue(":name", project->getProjectName());
+
+        if (!insertProject.exec()) {
+            qWarning() << "Failed to insert project:" << insertProject.lastError().text();
+            continue;
+        }
+
+        int projectId = insertProject.lastInsertId().toInt();
+
+        for (const Student& student : project->getStudents()) {
+            QSqlQuery insertStudent;
+            insertStudent.prepare("INSERT INTO Students (studentId, result, success, projectId) "
+                                  "VALUES (:studentId, :result, :success, :projectId)");
+            insertStudent.bindValue(":studentId", student.getStudentID());
+            insertStudent.bindValue(":result", student.getResult());
+            insertStudent.bindValue(":success", student.isSuccess());
+            insertStudent.bindValue(":projectId", projectId);
+
+            if (!insertStudent.exec()) {
+                qWarning() << "Failed to insert student:" << insertStudent.lastError().text();
+            }
+        }
+    }
+
+    qDebug() << "All projects and students saved.";
+}
+
+QList<Project*> SQLite::loadProjects() {
+    QList<Project*> projects;
+    QSqlDatabase db = QSqlDatabase::database();
+
+    if (!db.isOpen()) {
+        qWarning() << "Database not open in loadProjects.";
+        return projects;
+    }
+
+    QSqlQuery projectQuery("SELECT id, name FROM Projects");
+    while (projectQuery.next()) {
+        int projectId = projectQuery.value("id").toInt();
+        QString projectName = projectQuery.value("name").toString();
+
+        Project* project = new Project(projectName);
+
+        QSqlQuery studentQuery;
+        studentQuery.prepare("SELECT studentId, result, success FROM Students WHERE projectId = :pid");
+        studentQuery.bindValue(":pid", projectId);
+
+        QList<Student> studentList;
+        if (studentQuery.exec()) {
+            while (studentQuery.next()) {
+                QString sid = studentQuery.value(0).toString();
+                QString res = studentQuery.value(1).toString();
+                bool succ = studentQuery.value(2).toBool();
+                studentList.append(Student(sid, res, succ));
+            }
+        } else {
+            qWarning() << "Error loading students for project" << projectId << ":" << studentQuery.lastError().text();
+        }
+
+        project->setStudents(studentList);
+        projects.append(project);
+    }
+
+    qDebug() << "Loaded" << projects.size() << "projects from database.";
+    return projects;
 }
 

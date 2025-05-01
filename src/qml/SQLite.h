@@ -9,10 +9,13 @@
 #include <QList>
 
 class Student;
+class Project;
 class SQLite {
 public:
     static void saveStudents(const QList<Student*>& students);
     static QList<Student*> loadStudents();
+    static void saveProjects(const QList<Project*>& projects);
+    static QList<Project*> loadProjects();
 };
 
 
