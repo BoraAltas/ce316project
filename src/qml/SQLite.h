@@ -5,4 +5,15 @@
 #ifndef SQLITE_H
 #define SQLITE_H
 
+#include <QObject>
+#include <QList>
+
+class Student;
+class SQLite {
+public:
+    static void saveStudents(const QList<Student*>& students);
+};
+
+
+
 #endif //SQLITE_H
