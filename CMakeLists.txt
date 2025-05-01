@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
-
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Sql)
 
 qt_standard_project_setup(REQUIRES 6.9)
