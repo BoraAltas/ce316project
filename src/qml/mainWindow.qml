@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtCore
+import QtQuick.Dialogs
 
 ApplicationWindow { // Main app window
     id: mainWindow
