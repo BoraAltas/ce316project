@@ -1,6 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs
+
 
 //import iae
 
@@ -210,7 +212,20 @@ ApplicationWindow {
                         model: ["Select", "C", "C++", "Java", "Python"]
                     }
 
-                    Label { text: "Student ZIP Directory:" }
+                    Label { text: "Student ZIP Directory:"
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 20
+                            Button {
+                                text: "Open File"
+                                onClicked: {
+                                    fileDialogHelper.openFileDialog()
+                                }
+                            }
+
+                        }
+
+                    }
                     TextField {
                         Layout.preferredWidth: 200
                         placeholderText: "Choose ZIP directory..." }

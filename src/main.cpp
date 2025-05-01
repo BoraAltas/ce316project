@@ -1,29 +1,33 @@
-#include "iae.h"
-#include <QGuiApplication>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include "filedialoghelper.h"
+#include "iae.h"
 
-int main(int argc, char* argv[]) {
-    QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName(QStringLiteral("ce216"));  // needed for settings usage in qml
-    QGuiApplication::setOrganizationName(QStringLiteral("ce216")); // needed for settings usage in qml
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);  // QWidget desteği sağlar
+    QApplication::setApplicationName("ce216");
+    QApplication::setOrganizationName("ce216");
+
     QQmlApplicationEngine engine;
 
-    IAE iae;
-    const auto qmlUrl = QStringLiteral("iae");
+    // QFileDialog'ı QML'de kullanmak için context property olarak ekleniyor
+    FileDialogHelper fileDialogHelper;
+    engine.rootContext()->setContextProperty("fileDialogHelper", &fileDialogHelper);
 
-    engine.rootContext()->setContextProperty(qmlUrl, &iae);
+    // QML_SINGLETON olarak IAE sınıfını tanıt
+    static IAE iaeInstance;
+    qmlRegisterSingletonInstance("ce216", 1, 0, "IAE", &iaeInstance);
 
-    QObject::connect(
-        &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
-        []() {
+    // Yükleme başarısızsa uygulamayı sonlandır
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [=](QObject *obj, const QUrl &objUrl) {
+        if (!obj && objUrl == QUrl(QStringLiteral("qrc:/src/qml/mainWindow.qml"))) {
             QCoreApplication::exit(-1);
-        },
-        Qt::QueuedConnection);
+        }
+    }, Qt::QueuedConnection);
 
-    const QUrl url = QUrl(QStringLiteral("qrc:/src/qml/mainWindow.qml"));
-    engine.load(url);
+    engine.load(QUrl(QStringLiteral("qrc:/src/qml/mainWindow.qml")));
 
-    return QGuiApplication::exec();
+    return app.exec();
 }

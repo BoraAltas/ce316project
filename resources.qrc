@@ -12,9 +12,8 @@
         <file>src/qml/images/import.png</file>
         <file>src/qml/images/export.png</file>
         <file>src/qml/images/help.png</file>
-
-
-
+        <file>src/filedialoghelper.cpp</file>
+        <file>src/filedialoghelper.h</file>
 
 
     </qresource>

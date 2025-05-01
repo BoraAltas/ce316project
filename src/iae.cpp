@@ -2,6 +2,7 @@
 #include <iostream>
 #include <QDebug>
 #include <utility>
+#include <QFileDialog>
 
 class iaeBackend {
 public:
@@ -9,6 +10,10 @@ public:
 };
 
 IAE::IAE(QObject *parent) : QObject(parent), iae(std::make_unique<iaeBackend>()) {} //constructor
+
+QString IAE::openFileDialog() {
+    return QFileDialog::getOpenFileName(nullptr, "Select File", "", "All Files (*.*)");
+}
 
 IAE::~IAE() { //destructor , todo
     std::cout << "hello!";

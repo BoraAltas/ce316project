@@ -20,6 +20,7 @@ public:
 
     [[nodiscard]] QString status()const; // [[nodiscard]] means the caller must use the return value, can't just call it for funzies
 
+    Q_INVOKABLE QString openFileDialog();
     Q_INVOKABLE void setStatus(const QString &status);
 
     Q_SIGNALS:
