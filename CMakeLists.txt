@@ -31,6 +31,7 @@ set(PROJECT_SOURCES
         src/zipHandler.h
 )
 
+set(MINIZIP_SOURCES
         src/zlib-1.3.1/contrib/minizip/unzip.c
         src/zlib-1.3.1/contrib/minizip/ioapi.c
 )
