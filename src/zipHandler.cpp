@@ -6,44 +6,41 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileDialog>
-#include <QProcess>
-#include <qcoreapplication.h>
-#include <zlib.h>
+#include <QFile>
+#include <QCoreApplication>
 #include "unzip.h"
-
 
 ZipHandler::ZipHandler(QObject *parent) : QObject(parent) {}
 
 void ZipHandler::openFileDialog() {
-    QString file = QFileDialog::getOpenFileName(nullptr, "Select a Zip File", "", tr("ZIP Archives (*.zip)"));
+    QStringList files = QFileDialog::getOpenFileNames(nullptr, "Select Zip Files", "", tr("ZIP Archives (*.zip)"));
 
-    if (!file.isEmpty()) {
-        m_selectedFile = file;
+    if (!files.isEmpty()) {
+        m_selectedFiles = files;
 
-        if (m_selectedFile.endsWith(".zip", Qt::CaseInsensitive)) {
-            qDebug() << "zip file" << m_selectedFile;
-            unzipFile();
-
-        } else {
-            qDebug() << "not a zip file" << m_selectedFile;
+        for (const QString &file : m_selectedFiles) {
+            if (file.endsWith(".zip", Qt::CaseInsensitive)) {
+                qDebug() << "Processing zip file:" << file;
+                unzipFile(file);
+            } else {
+                qDebug() << "Skipped non-zip file:" << file;
+            }
         }
 
-        emit selectedFileChanged();
+        emit selectedFilesChanged();
     }
 }
 
-QString ZipHandler::selectedFile() const {
-    return m_selectedFile;
+QStringList ZipHandler::selectedFiles() const {
+    return m_selectedFiles;
 }
-void ZipHandler::unzipFile() {
+
+void ZipHandler::unzipFile(const QString &zipFilePath) {
     QString projectRootDir = QCoreApplication::applicationDirPath();
-
-    // Go one directory up from the build folder (cmake-build-debug)
     QDir projectDir(projectRootDir);
-    projectDir.cdUp(); //Goes up to the parent directory
-
-    // Makes sure its goes to the parent directorys "src"
+    projectDir.cdUp();
     QDir srcDir(projectDir.absoluteFilePath("src"));
+
     if (!srcDir.exists()) {
         if (!srcDir.mkpath(".")) {
             qDebug() << "Failed to create src directory.";
@@ -51,14 +48,11 @@ void ZipHandler::unzipFile() {
         }
     }
 
-    // Log the src directory path to check if it's correct
     qDebug() << "Extracting to:" << srcDir.absolutePath();
 
-    QString zipFilePath = m_selectedFile;
     unzFile zipfile = unzOpen(zipFilePath.toStdString().c_str());
-
     if (zipfile == nullptr) {
-        qDebug() << "Cannot open zip file.";
+        qDebug() << "Cannot open zip file:" << zipFilePath;
         return;
     }
 
@@ -82,10 +76,8 @@ void ZipHandler::unzipFile() {
         QString fullPath = srcDir.absoluteFilePath(QString::fromUtf8(filename));
 
         if (filename[strlen(filename) - 1] == '/') {
-            // It's a directory
             QDir().mkpath(fullPath);
         } else {
-            // It's a file
             QFile file(fullPath);
             if (!file.open(QIODevice::WriteOnly)) {
                 qDebug() << "Could not open file for writing:" << fullPath;
@@ -120,5 +112,5 @@ void ZipHandler::unzipFile() {
     }
 
     unzClose(zipfile);
-    qDebug() << "Unzip completed successfully.";
+    qDebug() << "Unzip completed for:" << zipFilePath;
 }

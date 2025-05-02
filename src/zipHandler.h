@@ -7,24 +7,25 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <zlib.h>
 
 class ZipHandler : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString selectedFile READ selectedFile NOTIFY selectedFileChanged)
+    Q_PROPERTY(QStringList selectedFiles READ selectedFiles NOTIFY selectedFilesChanged)
 
 public:
     explicit ZipHandler(QObject *parent = nullptr);
     Q_INVOKABLE void openFileDialog();
-    QString selectedFile() const;
+    QStringList selectedFiles() const;
 
     signals:
-        void selectedFileChanged();
+        void selectedFilesChanged();
 
 private:
-    QString m_selectedFile;
+    QStringList m_selectedFiles;
 
-    void unzipFile();
+    void unzipFile(const QString &zipFilePath);
 };
 
 
