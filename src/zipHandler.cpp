@@ -47,8 +47,15 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
             return;
         }
     }
+    QDir unzipDir(srcDir.filePath("unzip"));
+    if (!unzipDir.exists()) {
+        if (!unzipDir.mkpath(".")) {
+            qDebug() << "Failed to create unzip directory.";
+            return;
+        }
+    }
 
-    qDebug() << "Extracting to:" << srcDir.absolutePath();
+    qDebug() << "Extracting to:" << unzipDir.absolutePath();
 
     unzFile zipfile = unzOpen(zipFilePath.toStdString().c_str());
     if (zipfile == nullptr) {
@@ -73,12 +80,15 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
             return;
         }
 
-        QString fullPath = srcDir.absoluteFilePath(QString::fromUtf8(filename));
+        QString relativePath = QString::fromUtf8(filename);
+        QString fullPath = unzipDir.absoluteFilePath(relativePath);
 
         if (filename[strlen(filename) - 1] == '/') {
             QDir().mkpath(fullPath);
         } else {
             QFile file(fullPath);
+            QDir().mkpath(QFileInfo(fullPath).absolutePath());
+
             if (!file.open(QIODevice::WriteOnly)) {
                 qDebug() << "Could not open file for writing:" << fullPath;
                 unzClose(zipfile);
