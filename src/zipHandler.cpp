@@ -82,6 +82,12 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
         }
 
         QString relativePath = QString::fromUtf8(filename);
+
+        if (relativePath.startsWith("__MACOSX") || relativePath.contains("/__MACOSX")) {
+            qDebug() << "Skipping system folder:" << relativePath;
+            continue;
+        }
+
         QString fullPath = unzipDir.absoluteFilePath(relativePath);
 
         if (filename[strlen(filename) - 1] == '/') {
