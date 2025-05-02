@@ -18,7 +18,6 @@ public:
     void setStudents(const QList<Student>&students);
     void setProjectName(const QString&projectName);
 
-
 private:
     QString m_projectName;
     QList<Student> m_students;

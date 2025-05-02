@@ -26,9 +26,9 @@ set(PROJECT_SOURCES
         src/project.h
         src/student.cpp
         src/student.h
-        src/qml/SQLite.cpp
-        src/qml/SQLite.h
         src/sqlite3.c
+        src/SQLite.cpp
+        src/SQLite.h
 )
 
 qt_add_qml_module(

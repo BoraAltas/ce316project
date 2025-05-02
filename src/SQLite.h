@@ -1,5 +1,5 @@
 //
-// Created by efeso on 24.04.2025.
+// Created by Alp Koçak on 3.05.2025.
 //
 
 #ifndef SQLITE_H
