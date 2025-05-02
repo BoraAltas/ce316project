@@ -55,6 +55,7 @@ QList<Student*> SQLite::loadStudents() {
     qDebug() << "Loaded" << studentList.size() << "students from database.";
     return studentList;
 }
+
 void SQLite::saveProjects(const QList<Project*>& projects) {
     QSqlDatabase db = QSqlDatabase::database();
     if (!db.isOpen()) {
@@ -74,13 +75,13 @@ void SQLite::saveProjects(const QList<Project*>& projects) {
 
         int projectId = insertProject.lastInsertId().toInt();
 
-        for (const Student& student : project->getStudents()) {
+        for (Student* student : project->getStudents()) {
             QSqlQuery insertStudent;
             insertStudent.prepare("INSERT INTO Students (studentId, result, success, projectId) "
                                   "VALUES (:studentId, :result, :success, :projectId)");
-            insertStudent.bindValue(":studentId", student.getStudentID());
-            insertStudent.bindValue(":result", student.getResult());
-            insertStudent.bindValue(":success", student.isSuccess());
+            insertStudent.bindValue(":studentId", student->getStudentID());
+            insertStudent.bindValue(":result", student->getResult());
+            insertStudent.bindValue(":success", student->isSuccess());
             insertStudent.bindValue(":projectId", projectId);
 
             if (!insertStudent.exec()) {
@@ -112,13 +113,15 @@ QList<Project*> SQLite::loadProjects() {
         studentQuery.prepare("SELECT studentId, result, success FROM Students WHERE projectId = :pid");
         studentQuery.bindValue(":pid", projectId);
 
-        QList<Student> studentList;
+        QList<Student*> studentList;
         if (studentQuery.exec()) {
             while (studentQuery.next()) {
                 QString sid = studentQuery.value(0).toString();
                 QString res = studentQuery.value(1).toString();
                 bool succ = studentQuery.value(2).toBool();
-                studentList.append(Student(sid, res, succ));
+
+                Student* student = new Student(sid, res, succ, project); // parent olarak project atanır
+                studentList.append(student);
             }
         } else {
             qWarning() << "Error loading students for project" << projectId << ":" << studentQuery.lastError().text();
@@ -131,4 +134,3 @@ QList<Project*> SQLite::loadProjects() {
     qDebug() << "Loaded" << projects.size() << "projects from database.";
     return projects;
 }
-

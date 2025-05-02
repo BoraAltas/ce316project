@@ -16,10 +16,10 @@ void Project::setProjectName(const QString &projectName) {
     }
 }
 
-QList<Student> Project::getStudents() const {
+QList<Student*> Project::getStudents() const {
     return m_students;
 }
 
-void Project::setStudents(const QList<Student> &students) {
+void Project::setStudents(const QList<Student*>& students) {
     m_students = students;
 }

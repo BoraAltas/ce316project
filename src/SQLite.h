@@ -10,7 +10,7 @@
 
 class Student;
 class Project;
-class SQLite {
+class SQLite final {
 public:
     static void saveStudents(const QList<Student*>& students);
     static QList<Student*> loadStudents();

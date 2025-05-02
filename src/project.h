@@ -13,14 +13,14 @@ class Project final : public QObject {
 public:
     explicit Project(const QString &projectName, QObject *parent = nullptr);
     [[nodiscard]] QString getProjectName()const;
-    [[nodiscard]] QList<Student>getStudents()const;
+    [[nodiscard]] QList<Student*> getStudents()const;
 
-    void setStudents(const QList<Student>&students);
-    void setProjectName(const QString&projectName);
+    void setStudents(const QList<Student*>& students);
+    void setProjectName(const QString &projectName);
 
 private:
     QString m_projectName;
-    QList<Student> m_students;
+    QList<Student*> m_students;
 };
 
 
