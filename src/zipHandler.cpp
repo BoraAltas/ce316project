@@ -37,9 +37,10 @@ QStringList ZipHandler::selectedFiles() const {
 
 void ZipHandler::unzipFile(const QString &zipFilePath) {
     QString projectRootDir = QCoreApplication::applicationDirPath();
-    QDir projectDir(projectRootDir);
-    projectDir.cdUp();
-    QDir srcDir(projectDir.absoluteFilePath("src"));
+    QDir projectDir(QCoreApplication::applicationDirPath());
+    while (!QFile::exists(projectDir.filePath("src/main.cpp")) && projectDir.cdUp()) {
+    }
+    QDir srcDir(projectDir.filePath("src"));
 
     if (!srcDir.exists()) {
         if (!srcDir.mkpath(".")) {

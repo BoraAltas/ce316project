@@ -19,7 +19,7 @@ public:
     Q_INVOKABLE void openFileDialog();
     QStringList selectedFiles() const;
 
-    signals:
+    Q_SIGNALS:
         void selectedFilesChanged();
 
 private:
