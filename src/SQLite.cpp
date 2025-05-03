@@ -75,7 +75,10 @@ void SQLite::saveProjects(const QList<Project*>& projects) {
 
         int projectId = insertProject.lastInsertId().toInt();
 
-        for (Student* student : project->getStudents()) {
+        QQmlListProperty<Student> students = project->getStudents();
+        for (qsizetype i = 0; i < students.count(&students); ++i) {
+            Student* student = students.at(&students, i);
+            if (!student) continue;
             QSqlQuery insertStudent;
             insertStudent.prepare("INSERT INTO Students (studentId, result, success, projectId) "
                                   "VALUES (:studentId, :result, :success, :projectId)");
@@ -119,15 +122,26 @@ QList<Project*> SQLite::loadProjects() {
                 QString sid = studentQuery.value(0).toString();
                 QString res = studentQuery.value(1).toString();
                 bool succ = studentQuery.value(2).toBool();
-
-                Student* student = new Student(sid, res, succ, project); // parent olarak project atanır
+                Student* student = new Student(sid, res, succ, project); // Set project as parent
                 studentList.append(student);
             }
         } else {
             qWarning() << "Error loading students for project" << projectId << ":" << studentQuery.lastError().text();
         }
 
-        project->setStudents(studentList);
+        QQmlListProperty<Student> studentProp(
+            project,
+            &studentList,
+            nullptr,
+            [](QQmlListProperty<Student>* prop) -> qsizetype {
+                return static_cast<QList<Student*>*>(prop->data)->size();
+            },
+            [](QQmlListProperty<Student>* prop, qsizetype index) -> Student* {
+                return static_cast<QList<Student*>*>(prop->data)->at(index);
+            },
+            nullptr
+        );
+        project->setStudents(studentProp);
         projects.append(project);
     }
 

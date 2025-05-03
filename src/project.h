@@ -6,17 +6,21 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QQmlListProperty>
 
 class Project final : public QObject {
     Q_OBJECT
 
+    Q_PROPERTY(QString projectName READ getProjectName WRITE setProjectName)
+    Q_PROPERTY(QQmlListProperty<Student> students READ getStudents WRITE setStudents)
+
 public:
     explicit Project(const QString &projectName, QObject *parent = nullptr);
     [[nodiscard]] QString getProjectName()const;
-    [[nodiscard]] QList<Student*> getStudents()const;
+    [[nodiscard]] QQmlListProperty<Student>getStudents();
 
-    void setStudents(const QList<Student*>& students);
-    void setProjectName(const QString &projectName);
+    void setStudents(QQmlListProperty<Student> students);
+    void setProjectName(const QString&projectName);
 
 private:
     QString m_projectName;

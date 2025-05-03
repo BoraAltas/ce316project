@@ -16,10 +16,13 @@ void Project::setProjectName(const QString &projectName) {
     }
 }
 
-QList<Student*> Project::getStudents() const {
-    return m_students;
+QQmlListProperty<Student> Project::getStudents() {
+    return {this,&m_students};
 }
 
-void Project::setStudents(const QList<Student*>& students) {
-    m_students = students;
+void Project::setStudents(QQmlListProperty<Student> students) {
+    m_students.clear();
+    for (int i = 0; i < students.count(&students); ++i) {
+        m_students.append(students.at(&students, i));
+    }
 }
