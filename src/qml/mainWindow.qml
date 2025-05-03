@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
 
-import iae
+import iae 1.0
 
 ApplicationWindow {
     visible: true
@@ -13,8 +13,8 @@ ApplicationWindow {
     color: "#f5f5f5"
 
     Component.onCompleted: {
-        iae.Initialize()
-    }
+            IAE.Initialize()
+        }
 
     CreateNewConfiguration {
         id: createConfigDialog
@@ -95,7 +95,7 @@ ApplicationWindow {
             }
             MenuItem { text: "Edit Existing"
                 onTriggered: {
-                    editConfigDialog.configModel = iae.getConfigsAsVariantList()
+                    editConfigDialog.configModel = IAE.getConfigsAsVariantList()
                     editConfigDialog.visible = true
                 }
             }

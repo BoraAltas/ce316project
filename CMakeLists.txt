@@ -10,7 +10,6 @@ set(CMAKE_AUTORCC ON)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core QuickDialogs2)
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core QuickDialogs2 Widgets)
 
 qt_standard_project_setup(REQUIRES 6.9)
@@ -41,14 +40,13 @@ qt_add_qml_module(
         URI iae
         VERSION 1.0
         QML_FILES
-        src/qml/mainWindow.qml
+        src/qml/MainWindow.qml
         src/qml/CreateNewConfiguration.qml
         src/qml/NewProject.qml
         src/qml/EditExistingConfig.qml
         src/qml/RemoveConfig.qml
         src/qml/ImportConfig.qml
         src/qml/ExportConfig.qml
-
 )
 
 qt_add_executable(iae
@@ -72,3 +70,7 @@ target_link_libraries(iae
         Qt6::Widgets
         zlibstatic
 )
+
+if (WIN32)
+    target_link_libraries(iae PRIVATE ws2_32)
+endif()

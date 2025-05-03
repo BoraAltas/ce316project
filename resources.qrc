@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>src/qml/mainWindow.qml</file>
+        <file>src/qml/MainWindow.qml</file>
         <file>src/qml/CreateNewConfiguration.qml</file>
         <file>src/iae.cpp</file>
         <file>src/iae.h</file>
@@ -12,10 +12,5 @@
         <file>src/qml/images/import.png</file>
         <file>src/qml/images/export.png</file>
         <file>src/qml/images/help.png</file>
-
-
-
-
-
     </qresource>
 </RCC>
