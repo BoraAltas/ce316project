@@ -1,4 +1,5 @@
 #include "iae.h"
+#include <QApplication>
 #include <QGuiApplication>
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
@@ -22,9 +23,9 @@ int main(int argc, char* argv[]) {
 
     sqlite3_close(db);
 
-    QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName(QStringLiteral("ce216"));  // needed for settings usage in qml
-    QGuiApplication::setOrganizationName(QStringLiteral("ce216")); // needed for settings usage in qml
+    QApplication app(argc, argv);
+    QApplication::setApplicationName(QStringLiteral("ce216"));  // needed for settings usage in qml
+    QApplication::setOrganizationName(QStringLiteral("ce216")); // needed for settings usage in qml
     QQmlApplicationEngine engine;
 
     IAE iae;

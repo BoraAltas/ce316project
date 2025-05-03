@@ -11,6 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Sql)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Quick Qml Sql Widgets)
 
 qt_standard_project_setup(REQUIRES 6.9)
 qt_policy(set QTP0001 NEW)
@@ -48,10 +49,12 @@ qt_add_executable(iae
 target_link_libraries(iae
         PRIVATE
         iaeQml
-        Qt6::Quick
-        Qt6::Gui
         Qt6::Core
+        Qt6::Gui
+        Qt6::Quick
+        Qt6::Qml
         Qt6::Sql
+        Qt6::Widgets
 )
 target_include_directories(iae
         PRIVATE
