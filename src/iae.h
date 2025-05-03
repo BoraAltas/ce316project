@@ -57,6 +57,8 @@ public:
     Q_INVOKABLE void saveProjects();
     Q_INVOKABLE void editConfig(const QString& configName, const QString& lang, const QString& compileParams);
 
+    Q_INVOKABLE QVariantList getConfigsAsVariantList() const;
+
     void saveAllConfigs();
     void loadConfigs(const QString &folderPath);
     void loadProjects();

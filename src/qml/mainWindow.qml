@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
 
-//import iae
+import iae
 
 ApplicationWindow {
     visible: true
@@ -11,6 +11,10 @@ ApplicationWindow {
     height: 700
     title: "AssignCheck"
     color: "#f5f5f5"
+
+    Component.onCompleted: {
+        iae.Initialize()
+    }
 
     CreateNewConfiguration {
         id: createConfigDialog
@@ -91,11 +95,7 @@ ApplicationWindow {
             }
             MenuItem { text: "Edit Existing"
                 onTriggered: {
-                    editConfigDialog.configModel = [
-                        { name: "C Config", language: "C", compilerPath: "C:/MinGW/bin/gcc.exe" },
-                        { name: "Python Conf", language: "Python", compilerPath: "python" }
-                        // fill after
-                    ]
+                    editConfigDialog.configModel = iae.getConfigsAsVariantList()
                     editConfigDialog.visible = true
                 }
             }
@@ -193,16 +193,11 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Project Name:" }
-                    ComboBox {
-                        id: projectNameComboBox
+                    TextField {
+                        id: projectNameField
                         Layout.preferredWidth: 200
                         Layout.fillWidth: false
-
-                        model: [
-                            "Project A",
-                            "Project B",
-                            "Project C",
-                        ]
+                        placeholderText: "Enter Project Name"
                     }
 
                     Label { text: "Configuration:" }

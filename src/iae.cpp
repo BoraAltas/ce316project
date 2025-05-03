@@ -70,6 +70,18 @@ void IAE::Initialize() {
     loadProjects();
 }
 
+QVariantList IAE::getConfigsAsVariantList() const {
+    QVariantList configList;
+    for (const auto &config : iae->m_configs) {
+        QVariantMap configMap;
+        configMap["name"] = config->configName();
+        configMap["language"] = config->lang();
+        configMap["compileParams"] = config->compileParams();
+        configList.append(configMap);
+    }
+    return configList;
+}
+
 void IAE::saveConfig(QString configName, QString lang, QString compileParams) {
     auto  config = std::make_unique<Config>();
     config->m_configName = configName;
@@ -87,7 +99,7 @@ void IAE::saveConfig(QString configName, QString lang, QString compileParams) {
     jsonObject["compileParams"] = config->m_compileParams;
 
     QJsonDocument const jsonDoc(jsonObject);
-    QString const filePath = config->m_configName + ".json";
+    QString const filePath = "configs/" + config->m_configName + ".json";
     QFile file(filePath);
 
     if (file.exists()) {
@@ -116,6 +128,7 @@ void IAE::editConfig(const QString& configName, const QString& lang, const QStri
         if (cfg->m_configName == configName) {
             cfg->m_lang = lang;
             cfg->m_compileParams = compileParams;
+            saveConfig(cfg->m_configName, cfg->m_lang, cfg->m_compileParams);
             qDebug() << "Config updated:" << configName;
             return;
         }

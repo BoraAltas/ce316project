@@ -50,7 +50,7 @@ Dialog {
                         listView.currentIndex = index
                         configNameField.text = modelData.name
                         languageComboBox.currentIndex = languageComboBox.model.indexOf(modelData.language)
-                        compilerPathField.text = modelData.compilerPath
+                        compileParamsField.text = modelData.compileParams
                         oldConfigName = modelData.name
                         searchField.text = modelData.name
                         searchField.focus = false
@@ -80,13 +80,15 @@ Dialog {
             ComboBox {
                 id: languageComboBox
                 Layout.fillWidth: true
-                model: ["Select", "C", "C++", "Java", "Python"]
+                model: ["C", "C++", "Java", "Python"]
+                currentIndex: -1
+                onActivated: if (currentIndex === -1) currentIndex = -1
             }
 
-            Label { text: "Compiler Path:" }
+            Label { text: "Options for compiler/interpreter:" }
             TextField {
-                id: compilerPathField
-                placeholderText: "Path to compiler"
+                id: compileParamsField
+                placeholderText: "Options for compiler/interpreter"
                 Layout.fillWidth: true
             }
         }
@@ -100,13 +102,19 @@ Dialog {
             Button {
                 text: "Save"
                 Layout.preferredWidth: 80
+                enabled: languageComboBox.currentIndex >= 0
                 onClicked: {
                     if (oldConfigName !== "") {
                         editConfigDialog.configUpdated(
                             oldConfigName,
                             configNameField.text,
                             languageComboBox.currentText,
-                            compilerPathField.text
+                            compileParamsField.text
+                        )
+                        iae.editConfig(
+                            configNameField.text,
+                            languageComboBox.currentText,
+                            compileParamsField.text
                         )
                         editConfigDialog.close()
                     } else {

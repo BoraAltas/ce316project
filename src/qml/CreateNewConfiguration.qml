@@ -35,13 +35,15 @@ Dialog {
             Label { text: "Language:" }
             ComboBox {
                 id: languageComboBox
-                model: ["Select", "C", "C++", "Java", "Python"]
+                model: [ "C", "C++", "Java", "Python"]
                 Layout.fillWidth: true
+                currentIndex: -1
+                onActivated: if (currentIndex === -1) currentIndex = -1
             }
 
-            Label { text: "Compiler Path:" }
+            Label { text: "Compiler/Interpreter options:" }
             TextField {
-                id: compilerPathField
+                id: compilerParamsField
                 placeholderText: "e.g. C:/MinGW/bin/gcc.exe"
                 Layout.fillWidth: true
             }
@@ -59,11 +61,12 @@ Dialog {
             Button {
                 text: "Create"
                 Layout.preferredWidth: 80
+                enabled: languageComboBox.currentIndex >= 0
                 onClicked: {
                     iae.saveConfig(
                         configNameField.text,
                         languageComboBox.currentText,
-                        compilerPathField.text
+                        compilerParamsField.text
                     )
                     createConfigDialog.close()
                 }
