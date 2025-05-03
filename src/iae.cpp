@@ -42,8 +42,8 @@ Our dearest friend kocakalp will solve this. Bless his soul <3.
 class iaeBackend {
 public:
     QString m_status; // for example
-    QList<Project> m_projects;
-    QList<Config> m_configs;
+    QList<Project*> m_projects;
+    QList<Config*> m_configs;
 };
 
 IAE::IAE(QObject *parent) : QObject(parent), iae(std::make_unique<iaeBackend>()) {} //constructor
@@ -70,19 +70,24 @@ void IAE::Initialize() {
     loadProjects();
 }
 
-void IAE::saveConfig(const Config &config) {
-    if (config.m_configName.isEmpty()) {
+void IAE::saveConfig(QString configName, QString lang, QString compileParams) {
+    auto  config = std::make_unique<Config>();
+    config->m_configName = configName;
+    config->m_lang = lang;
+    config->m_compileParams = compileParams;
+
+    if (configName == "") {
         qWarning() << "Config name is empty. Cannot create file.";
         return;
     }
 
     QJsonObject jsonObject;
-    jsonObject["configName"] = config.m_configName;
-    jsonObject["language"] = config.m_lang;
-    jsonObject["compileParams"] = config.m_compileParams;
+    jsonObject["configName"] = config->m_configName;
+    jsonObject["language"] = config->m_lang;
+    jsonObject["compileParams"] = config->m_compileParams;
 
     QJsonDocument const jsonDoc(jsonObject);
-    QString const filePath = config.m_configName + ".json";
+    QString const filePath = config->m_configName + ".json";
     QFile file(filePath);
 
     if (file.exists()) {
@@ -95,11 +100,25 @@ void IAE::saveConfig(const Config &config) {
     } else {
         qWarning() << "Failed to open file for writing:" << filePath;
     }
+
+    iae->m_configs.append(config.release());
 }
 
 void IAE::saveAllConfigs() {
-    for (const auto &config : iae->m_configs) {
-        saveConfig(config);
+    for (Config* config : iae->m_configs) {
+        saveConfig(config->m_configName, config->m_lang, config->m_compileParams);
+    }
+}
+
+// might not be efficient, can be optimized
+void IAE::editConfig(const QString& configName, const QString& lang, const QString& compileParams) {
+    for (Config* cfg :  iae->m_configs) {
+        if (cfg->m_configName == configName) {
+            cfg->m_lang = lang;
+            cfg->m_compileParams = compileParams;
+            qDebug() << "Config updated:" << configName;
+            return;
+        }
     }
 }
 
@@ -145,17 +164,17 @@ void IAE::loadConfigs(const QString &folderPath){
         }
 
         QJsonObject const jsonObj = jsonDoc.object();
-        Config config;
-        config.m_configName = jsonObj.value("configName").toString();
-        config.m_lang = jsonObj.value("lang").toString();
-        config.m_compileParams = jsonObj.value("compileParams").toString();
+        auto config = std::make_unique<Config>();
+        config->m_configName = jsonObj.value("configName").toString();
+        config->m_lang = jsonObj.value("lang").toString();
+        config->m_compileParams = jsonObj.value("compileParams").toString();
 
-        if (config.m_configName.isEmpty()) {
+        if (config->m_configName.isEmpty()) {
             qWarning() << "Config name is empty in file:" << filePath;
             continue;
         }
 
-        iae->m_configs.append(config);
+        iae->m_configs.append(config.release());
     }
 
     qDebug() << "Loaded" << iae->m_configs.size() << "config(s) from folder.";
@@ -168,4 +187,12 @@ void IAE::loadProjects() {
 
 void IAE::saveProjects() { // all projects will be saved upon exit
     // TODO: save contents of m_projects to db
+}
+
+QQmlListProperty<Project> IAE::projects() {
+    return {this,&iae->m_projects};
+}
+
+QQmlListProperty<Config> IAE::configs() {
+    return {this,&iae->m_configs};
 }

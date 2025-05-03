@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import iae
 
 Dialog {
     id: createConfigDialog
@@ -59,7 +60,7 @@ Dialog {
                 text: "Create"
                 Layout.preferredWidth: 80
                 onClicked: {
-                    createConfigDialog.configCreated(
+                    iae.saveConfig(
                         configNameField.text,
                         languageComboBox.currentText,
                         compilerPathField.text
