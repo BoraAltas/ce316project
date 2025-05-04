@@ -337,7 +337,8 @@ void IAE::createProject(const QString& projectName, const QString& configName, c
         return;
     }
     qDebug() << "lang:" << conf->m_lang;
-    Project* project = handler.compileAndRunAllFiles(projectName, conf->m_lang, conf->m_compileParams, programArgs, expectedOutput);
+    QString projectPath = QDir::currentPath() + "/unzip/" + projectName;
+    Project* project = handler.compileAndRunAllFiles(projectName, projectPath, conf->m_lang, conf->m_compileParams, programArgs, expectedOutput);
     if (project != nullptr) {
         iae->m_projects.append(project);
         Q_EMIT projectsChanged();

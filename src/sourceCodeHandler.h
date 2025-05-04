@@ -16,7 +16,7 @@ public:
     explicit sourceCodeHandler(QObject *parent = nullptr);
     ~sourceCodeHandler();
 
-    Project* compileAndRunAllFiles(const QString& folderPath, const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput);
+    Project* compileAndRunAllFiles(const QString& projectname, const QString& folderPath, const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput);
 
     signals:
         void compilationFinished(const QString& result);

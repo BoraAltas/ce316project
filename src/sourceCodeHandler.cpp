@@ -12,14 +12,14 @@ sourceCodeHandler::sourceCodeHandler(QObject *parent) : QObject(parent){}
 
 sourceCodeHandler::~sourceCodeHandler() = default;
 //TYPECHECK NEEDED
-Project* sourceCodeHandler::compileAndRunAllFiles(const QString& folderPath,const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput) {
+Project* sourceCodeHandler::compileAndRunAllFiles(const QString& projectName, const QString& folderPath,const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput) {
     QDir dir(folderPath);
     if (!dir.exists()) {
         qWarning() << "Directory does not exist: " << folderPath;
         return nullptr;
     }
 
-    Project* m_project = new Project(folderPath);
+    Project* m_project = new Project(projectName);
 
     // Get all source files in the directory and its subdirectories based on the language type
     QStringList filePaths;
@@ -98,7 +98,7 @@ Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QSt
     const QString output = process.readAllStandardOutput() + process.readAllStandardError();
     const bool success = (!expectedOutput.isEmpty() && output.trimmed() == expectedOutput.trimmed());
     qDebug() << "Studentname:" << filePath << "Output:" << output << "Success:" << success << "Expected:" << expectedOutput;
-    return new Student(filePath, output, success);
+    return new Student(QFileInfo(QFileInfo(filePath).absolutePath()).fileName(), output, success);
 }
 
 

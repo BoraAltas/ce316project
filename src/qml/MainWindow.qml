@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
 
-import iae 1.0
+import iae
 
 ApplicationWindow {
     visible: true
@@ -229,8 +229,17 @@ ApplicationWindow {
 
                     Label { text: "Student ZIP Directory:" }
                     TextField {
+                        id: zipDirectoryField
                         Layout.preferredWidth: 200
                         placeholderText: "Choose ZIP directory..." }
+
+                    Button { text: "Open File"
+
+                        onClicked: {
+                            zipHandler.openFileDialog()
+                            zipDirectoryField.text = zipHandler.selectedFile
+                        }
+                    }
                 }
             }
 
@@ -265,7 +274,8 @@ ApplicationWindow {
                 Button { text: "Run All"
                     onClicked: {
                         IAE.isEmpty()
-
+                        zipHandler.setProjectName(projectNameField.text)
+                        zipHandler.unzipFile(zipDirectoryField.text)
                         IAE.createProject(
                             projectNameField.text,
                             configComboBox.currentText,
@@ -274,12 +284,7 @@ ApplicationWindow {
                         )
                     }
                 }
-                Button { text: "Open File"
 
-                onClicked: {
-                    zipHandler.openFileDialog()
-                    }
-                }
             }
             /*Label {
                 text: zipHandler.selectedFile
@@ -320,6 +325,83 @@ ApplicationWindow {
                                 color: "white"
                                 border.color: "#cccccc"
                                 Text { anchors.centerIn: parent; text: modelData.projectName }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        studentDialog.projectName = modelData.projectName
+                                        studentDialog.studentModel = modelData.students
+                                        studentDialog.visible = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Dialog {
+                        id: studentDialog
+                        title: "Students in Project"
+                        width: 800
+                        height: 400
+                        modal: true
+                        visible: false
+
+                        property string projectName: ""
+                        property var studentModel: null
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 10
+
+                            Label {
+                                text: "Project: " + studentDialog.projectName
+                                font.bold: true
+                                font.pixelSize: 16
+                            }
+
+                            ScrollView {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+
+                                ListView {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    model: studentDialog.studentModel
+
+                                    delegate: RowLayout {
+                                        spacing: 10
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignLeft
+
+                                        Rectangle {
+                                            Layout.preferredWidth: 200
+                                            height: 40
+                                            color: "white"
+                                            border.color: "#cccccc"
+                                            Text { anchors.centerIn: parent; text: modelData.studentID }
+                                        }
+                                        Rectangle {
+                                            Layout.preferredWidth: 200
+                                            height: 40
+                                            color: "white"
+                                            border.color: "#cccccc"
+                                            Text { anchors.centerIn: parent; text: modelData.result }
+                                        }
+                                        Rectangle {
+                                            Layout.preferredWidth: 200
+                                            height: 40
+                                            color: "white"
+                                            border.color: "#cccccc"
+                                            Text { anchors.centerIn: parent; text: modelData.success ? "Pass" : "Fail" }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Button {
+                                text: "Close"
+                                Layout.alignment: Qt.AlignRight
+                                onClicked: studentDialog.visible = false
                             }
                         }
                     }

@@ -12,8 +12,8 @@
 
 ZipHandler::ZipHandler(QObject *parent) : QObject(parent) {}
 
-QStringList ZipHandler::selectedFiles() const {
-    return m_selectedFiles;
+QString ZipHandler::selectedFile() const {
+    return m_selectedFile;
 }
 
 QString ZipHandler::projectName() const {
@@ -28,21 +28,17 @@ void ZipHandler::setProjectName(const QString &name) {
 }
 
 void ZipHandler::openFileDialog() {
-    QStringList files = QFileDialog::getOpenFileNames(nullptr, "Select Zip Files", "", tr("ZIP Archives (*.zip)"));
+    QString file = QFileDialog::getOpenFileName(nullptr, "Select Zip File", "", tr("ZIP Archives (*.zip)"));
 
-    if (!files.isEmpty()) {
-        m_selectedFiles = files;
-
-        for (const QString &file : m_selectedFiles) {
-            if (file.endsWith(".zip", Qt::CaseInsensitive)) {
-                qDebug() << "Processing zip file:" << file;
-                unzipFile(file);
-            } else {
-                qDebug() << "Skipped non-zip file:" << file;
-            }
+    if (!file.isEmpty()) {
+        if (file.endsWith(".zip", Qt::CaseInsensitive)) {
+            m_selectedFile = {file};
+            qDebug() << "Processing zip file:" << file;
+            unzipFile(file);
+            emit selectedFileChanged();
+        } else {
+            qDebug() << "Skipped non-zip file:" << file;
         }
-
-        emit selectedFilesChanged();
     }
 }
 
@@ -55,13 +51,8 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
     // Zip dosyasının adı (örneğin: Alp.zip → Alp)
     QString zipBaseName = QFileInfo(zipFilePath).baseName();
 
-    // Proje klasörünü bul
-    QDir projectDir(QCoreApplication::applicationDirPath());
-    while (!QFile::exists(projectDir.filePath("src/main.cpp")) && projectDir.cdUp()) {
-    }
-
     // Hedef klasör: src/unzip/projectName/zipBaseName/
-    QDir unzipDir(projectDir.filePath("src/unzip/" + m_projectName));
+    QDir unzipDir(QDir::currentPath() + "/unzip/");
     if (!unzipDir.exists()) {
         if (!unzipDir.mkpath(".")) {
             qDebug() << "Failed to create target directory:" << unzipDir.absolutePath();

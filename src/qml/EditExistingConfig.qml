@@ -2,6 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import iae 1.0
+
 Dialog {
     id: editConfigDialog
     title: "Edit Existing Configuration"
