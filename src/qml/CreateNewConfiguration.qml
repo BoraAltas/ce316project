@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import iae
+import iae 1.0
 
 Dialog {
     id: createConfigDialog
@@ -63,7 +63,7 @@ Dialog {
                 Layout.preferredWidth: 80
                 enabled: languageComboBox.currentIndex >= 0
                 onClicked: {
-                    iae.saveConfig(
+                    IAE.saveConfig(
                         configNameField.text,
                         languageComboBox.currentText,
                         compilerParamsField.text

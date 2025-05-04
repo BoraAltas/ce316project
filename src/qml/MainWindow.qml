@@ -14,7 +14,7 @@ ApplicationWindow {
 
     Component.onCompleted: {
             IAE.Initialize()
-        }
+    }
 
     CreateNewConfiguration {
         id: createConfigDialog
@@ -202,8 +202,29 @@ ApplicationWindow {
 
                     Label { text: "Configuration:" }
                     ComboBox {
+                        id: configComboBox
                         Layout.preferredWidth: 200
-                        model: ["Select", "C", "C++", "Java", "Python"]
+                        model: configModel
+
+                        ListModel {
+                            id: configModel
+                            Component.onCompleted: {
+                                configModel.clear()
+                                IAE.getConfigsAsVariantList().forEach(config => append({ name: config.name }));
+                            }
+                        }
+
+                        Connections {
+                            target: IAE
+                            function onConfigsChanged() {
+                                configModel.clear();
+                                IAE.getConfigsAsVariantList().forEach(config => configModel.append({ name: config.name }));
+                            }
+                        }
+
+                        delegate: ItemDelegate {
+                            text: model.name
+                        }
                     }
 
                     Label { text: "Student ZIP Directory:" }
@@ -224,10 +245,16 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Program Arguments:" }
-                    TextField { placeholderText: "e.g. input.txt output.txt" }
+                    TextField {
+                        id: programArgsField
+                        placeholderText: "e.g. input"
+                    }
 
                     Label { text: "Expected Output File:" }
-                    TextField { placeholderText: "e.g. expected.txt" }
+                    TextField {
+                        id: expectedOutputField
+                        placeholderText: "e.g. expected"
+                    }
                 }
             }
 
@@ -235,8 +262,18 @@ ApplicationWindow {
                 spacing: 20
                 Layout.alignment: Qt.AlignHCenter
 
-                Button { text: "Run All" }
-                Button { text: "Clear Results" }
+                Button { text: "Run All"
+                    onClicked: {
+                        IAE.isEmpty()
+
+                        IAE.createProject(
+                            projectNameField.text,
+                            configComboBox.currentText,
+                            programArgsField.text,
+                            expectedOutputField.text
+                        )
+                    }
+                }
                 Button { text: "Open File"
 
                 onClicked: {
@@ -263,14 +300,7 @@ ApplicationWindow {
                         spacing: 1
                         Rectangle {
                             color: "#dcdcdc"
-                            Layout.preferredWidth: 150
-                            height: 40
-                            border.color: "black"
-                            Text { anchors.centerIn: parent; text: "Project ID" }
-                        }
-                        Rectangle {
-                            color: "#dcdcdc"
-                            Layout.preferredWidth: 788
+                            Layout.fillWidth: true
                             height: 40
                             border.color: "black"
                             Text { anchors.centerIn: parent; text: "Project Name"; }
@@ -280,27 +310,16 @@ ApplicationWindow {
                     ListView {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        model: ListModel {
-                            ListElement { projectID: "123456"; projectName: "Project A" }
-                            ListElement { projectID: "234567"; projectName: "Project B" }
-                            ListElement { projectID: "345678"; projectName: "Project C" }
-                        }
+                        model: IAE.projects
 
                         delegate: RowLayout {
                             spacing: 1
                             Rectangle {
-                                Layout.preferredWidth: 150
+                                Layout.preferredWidth: 938
                                 height: 30
                                 color: "white"
                                 border.color: "#cccccc"
-                                Text { anchors.centerIn: parent; text: projectID }
-                            }
-                            Rectangle {
-                                Layout.preferredWidth: 788
-                                height: 30
-                                color: "white"
-                                border.color: "#cccccc"
-                                Text { anchors.centerIn: parent; text: projectName }
+                                Text { anchors.centerIn: parent; text: modelData.projectName }
                             }
                         }
                     }

@@ -11,8 +11,8 @@
 class Project final : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(QString projectName READ getProjectName WRITE setProjectName)
-    Q_PROPERTY(QQmlListProperty<Student> students READ getStudents WRITE setStudents)
+    Q_PROPERTY(QString projectName READ getProjectName WRITE setProjectName NOTIFY projectNameChanged)
+    Q_PROPERTY(QQmlListProperty<Student> students READ getStudents WRITE setStudents NOTIFY studentsChanged)
 
 public:
     explicit Project(const QString &projectName, QObject *parent = nullptr);
@@ -22,6 +22,11 @@ public:
     void setStudents(QQmlListProperty<Student> students);
     void addStudent(Student*student);
     void setProjectName(const QString&projectName);
+
+    Q_SIGNALS:
+        void projectNameChanged();
+        void studentsChanged();
+
 
 private:
     QString m_projectName;

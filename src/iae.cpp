@@ -1,5 +1,5 @@
 #include "iae.h"
-
+#include "sourceCodeHandler.h"
 #include "SQLite.h"
 #include "project.h"
 #include <QDebug>
@@ -55,6 +55,10 @@ IAE::~IAE() { //destructor , todo
     //close connections when necessary.
 }
 
+void IAE::isEmpty() {
+    qDebug() << iae->m_projects.isEmpty();
+    qDebug() << iae->m_projects.size();
+}
 QString IAE::status() const { //read
     return iae->m_status;
 }
@@ -141,8 +145,11 @@ void IAE::loadConfigs(const QString &folderPath){
     QDir const dir(folderPath);
 
     if (!dir.exists()) {
-        qWarning() << "Folder does not exist:" << folderPath;
-        return;
+        if (!QDir().mkpath(folderPath)) {
+            qWarning() << "Failed to create folder:" << folderPath;
+            return;
+        }
+        qDebug() << "Folder created:" << folderPath;
     }
 
     QStringList const jsonFiles = dir.entryList(QStringList() << "*.json", QDir::Files);
@@ -181,7 +188,7 @@ void IAE::loadConfigs(const QString &folderPath){
         QJsonObject const jsonObj = jsonDoc.object();
         auto config = std::make_unique<Config>();
         config->m_configName = jsonObj.value("configName").toString();
-        config->m_lang = jsonObj.value("lang").toString();
+        config->m_lang = jsonObj.value("language").toString();
         config->m_compileParams = jsonObj.value("compileParams").toString();
 
         if (config->m_configName.isEmpty()) {
@@ -227,7 +234,7 @@ void IAE::importConfig(const QString& importFilePath) {
     QJsonObject jsonObj = jsonDoc.object();
 
     QString configName = jsonObj.value("configName").toString();
-    QString lang = jsonObj.value("lang").toString();
+    QString lang = jsonObj.value("language").toString();
     QString compileParams = jsonObj.value("compileParams").toString();
 
     if (configName.isEmpty()) {
@@ -313,4 +320,27 @@ QQmlListProperty<Project> IAE::projects() {
 
 QQmlListProperty<Config> IAE::configs() {
     return {this,&iae->m_configs};
+}
+
+void IAE::createProject(const QString& projectName, const QString& configName, const QStringList&programArgs, const QString&expectedOutput) {
+    sourceCodeHandler handler;
+    const Config* conf = nullptr;
+    qDebug() << "Configname:" << configName;
+    for (Config* cfg : iae->m_configs) {
+        if (cfg->m_configName == configName) {
+            conf = cfg;
+            break;
+        }
+    }
+    if (conf == nullptr) {
+        qWarning() << "Config with name" << configName << "not found.";
+        return;
+    }
+    qDebug() << "lang:" << conf->m_lang;
+    Project* project = handler.compileAndRunAllFiles(projectName, conf->m_lang, conf->m_compileParams, programArgs, expectedOutput);
+    if (project != nullptr) {
+        iae->m_projects.append(project);
+        Q_EMIT projectsChanged();
+        qDebug() << "Projects created:" << project->getProjectName();
+    }
 }

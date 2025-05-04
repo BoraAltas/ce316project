@@ -31,4 +31,5 @@ void Project::addStudent(Student* student) {
     if (student != nullptr) {
         m_students.append(student);
     }
+    Q_EMIT studentsChanged();
 }

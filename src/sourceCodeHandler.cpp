@@ -12,8 +12,7 @@ sourceCodeHandler::sourceCodeHandler(QObject *parent) : QObject(parent){}
 
 sourceCodeHandler::~sourceCodeHandler() = default;
 //TYPECHECK NEEDED
-Project* sourceCodeHandler::compileAndRunAllFiles(const QString& folderPath, QString& language, const QStringList& compilerParams, const QStringList& programArgs, const QString& expectedOutput)
-{
+Project* sourceCodeHandler::compileAndRunAllFiles(const QString& folderPath,const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput) {
     QDir dir(folderPath);
     if (!dir.exists()) {
         qWarning() << "Directory does not exist: " << folderPath;
@@ -24,16 +23,16 @@ Project* sourceCodeHandler::compileAndRunAllFiles(const QString& folderPath, QSt
 
     // Get all source files in the directory and its subdirectories based on the language type
     QStringList filePaths;
-    language = language.toLower();
+    const QString l_language = language.toLower();
     QStringList filters;
 
-    if (language == "c++") {
+    if (l_language == "c++") {
         filters << "*.cpp";
-    } else if (language == "python") {
+    } else if (l_language == "python") {
         filters << "*.py";
-    } else if (language == "java") {
+    } else if (l_language == "java") {
         filters << "*.java";
-    } else if (language == "c") {
+    } else if (l_language == "c") {
         filters << "*.c";
     } else {
         qWarning() << "Unsupported language: " << language;
@@ -46,20 +45,20 @@ Project* sourceCodeHandler::compileAndRunAllFiles(const QString& folderPath, QSt
     }
 
     for (const QString& file : filePaths) {
-        Student* student = compileAndRunFile(file, language, compilerParams, programArgs, expectedOutput);
+        Student* student = compileAndRunFile(file, l_language, compilerParams, programArgs, expectedOutput);
         m_project->addStudent(student);
     }
 
     return m_project;
 }
 
-Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QString& language, const QStringList& compilerParams, const QStringList& programArgs, const QString& expectedOutput)
+Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput)
 {
     const QString compiler = determineCompiler(language);
     QProcess process;
 
     QString command = compiler;
-    QStringList arguments = compilerParams;
+    QStringList arguments = compilerParams.split(' ', Qt::SkipEmptyParts);
 
     if (language == "cpp" || language == "c") {
         arguments << filePath;
@@ -79,6 +78,8 @@ Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QSt
         arguments.clear();
         arguments << className << programArgs;
         command = "java";
+        qDebug() << arguments;
+        qDebug() << command;
     } else if (language == "python") {
         command = "python";
         arguments << filePath << programArgs;
@@ -87,14 +88,16 @@ Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QSt
         return nullptr;
     }
 
+    process.setWorkingDirectory(QFileInfo(filePath).absolutePath());
     process.start(command, arguments);
     if (!process.waitForFinished()) {
         qWarning() << "Error while running the file:" << filePath;
         return new Student(filePath, "Error while compiling", false);
     }
 
-    const QString output = process.readAllStandardOutput();
+    const QString output = process.readAllStandardOutput() + process.readAllStandardError();
     const bool success = (!expectedOutput.isEmpty() && output.trimmed() == expectedOutput.trimmed());
+    qDebug() << "Studentname:" << filePath << "Output:" << output << "Success:" << success << "Expected:" << expectedOutput;
     return new Student(filePath, output, success);
 }
 
@@ -102,19 +105,19 @@ Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QSt
 QString sourceCodeHandler::determineCompiler(const QString& config)
 {
     // Specify the compiler or interpreter based on the config for Windows:
-    if (config == "c++") {
+    if (config.toLower() == "c++") {
         // For C++ code, use MinGW's "g++" or MSVC's "cl.exe"
         return "g++";  // Or specify the full path if necessary, e.g., "C:/MinGW/bin/g++"
     }
-    if (config == "c") {
+    if (config.toLower() == "c") {
         // For C code, use "gcc" (MinGW) or MSVC's "cl.exe"
         return "gcc";  // Or specify the full path if necessary
     }
-    if (config == "java") {
+    if (config.toLower() == "java") {
         // For Java, use the Java compiler and runner
         return "javac";  // "javac" for compilation, "java" will be used to run the class
     }
-    if (config == "python") {
+    if (config.toLower() == "python") {
         // For Python, use the Python interpreter
         return "python";  // Assuming Python is installed and available in PATH
     }

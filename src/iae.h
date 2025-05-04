@@ -6,6 +6,7 @@
 #include <QQmlEngine>
 #include <QQmlListProperty>
 #include "project.h"
+#include "sourceCodeHandler.h"
 
 class iaeBackend;
 
@@ -46,11 +47,13 @@ class IAE : public QObject {
 public:
     explicit IAE(QObject *parent = nullptr);
     ~IAE() override;
+    Q_INVOKABLE void isEmpty();
 
     [[nodiscard]] QString status() const; // [[nodiscard]] means the caller must use the return value, can't just call it for funzies
     [[nodiscard]] QQmlListProperty<Project> projects();
     [[nodiscard]] QQmlListProperty<Config> configs();
 
+    Q_INVOKABLE void createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput);
     Q_INVOKABLE void setStatus(const QString &status);
     Q_INVOKABLE void Initialize();
     Q_INVOKABLE void saveConfig(QString configName, QString lang, QString compileParams);
