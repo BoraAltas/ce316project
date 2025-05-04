@@ -13,20 +13,24 @@
 class ZipHandler : public QObject {
     Q_OBJECT
     Q_PROPERTY(QStringList selectedFiles READ selectedFiles NOTIFY selectedFilesChanged)
+    Q_PROPERTY(QString projectName READ projectName WRITE setProjectName NOTIFY projectNameChanged)
 
 public:
     explicit ZipHandler(QObject *parent = nullptr);
     Q_INVOKABLE void openFileDialog();
     QStringList selectedFiles() const;
+    QString projectName() const;
+    void setProjectName(const QString &name);
 
-    Q_SIGNALS:
+    signals:
         void selectedFilesChanged();
+    void projectNameChanged();
 
 private:
     QStringList m_selectedFiles;
+    QString m_projectName;
 
     void unzipFile(const QString &zipFilePath);
 };
 
-
-#endif //ZIPHANDLER_H
+#endif // ZIPHANDLER_H
