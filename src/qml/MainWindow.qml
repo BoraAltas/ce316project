@@ -66,13 +66,13 @@ ApplicationWindow {
     }
     ExportConfig {
         id: exportConfigDialog
-        onExportRequested: (configName, fileName) => {
-            console.log("Export requested:")
-            console.log("Config:", configName)
-            console.log("Save As:", fileName)
-            // call backend save logic
+        configModel: IAE.getConfigsAsVariantList()
+        onExportRequested: (configName, filePath) => {
+            console.log("Exporting", configName, "to", filePath)
+            IAE.exportConfig(configName, filePath)
         }
     }
+
 
 
     menuBar: MenuBar {

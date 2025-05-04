@@ -195,6 +195,98 @@ void IAE::loadConfigs(const QString &folderPath){
     qDebug() << "Loaded" << iae->m_configs.size() << "config(s) from folder.";
 }
 
+void IAE::importConfig(const QString& importFilePath) {
+    QFile file(importFilePath);
+
+    if (!file.exists()) {
+        qWarning() << "Import file does not exist:" << importFilePath;
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Failed to open import file:" << importFilePath;
+        return;
+    }
+
+    QByteArray fileData = file.readAll();
+    file.close();
+
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(fileData, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+        return;
+    }
+
+    if (!jsonDoc.isObject()) {
+        qWarning() << "Invalid JSON structure in import file.";
+        return;
+    }
+
+    QJsonObject jsonObj = jsonDoc.object();
+
+    QString configName = jsonObj.value("configName").toString();
+    QString lang = jsonObj.value("lang").toString();
+    QString compileParams = jsonObj.value("compileParams").toString();
+
+    if (configName.isEmpty()) {
+        qWarning() << "Imported config name is empty. Skipping.";
+        return;
+    }
+
+    // Cheking if there are a config file with the same name
+    bool updated = false;
+    for (Config* existing : iae->m_configs) {
+        if (existing->m_configName == configName) {
+            existing->m_lang = lang;
+            existing->m_compileParams = compileParams;
+            updated = true;
+            qDebug() << "Existing config updated:" << configName;
+            break;
+        }
+    }
+
+
+    if (!updated) {
+        auto config = std::make_unique<Config>();
+        config->m_configName = configName;
+        config->m_lang = lang;
+        config->m_compileParams = compileParams;
+        iae->m_configs.append(config.release());
+        qDebug() << "New config imported:" << configName;
+    }
+
+    saveAllConfigs();
+}
+
+void IAE::exportConfig(const QString& configName, const QString& exportFilePath) {
+    for (const Config* config : iae->m_configs) {
+        if (config->m_configName == configName) {
+            QJsonObject jsonObject;
+            jsonObject["configName"] = config->m_configName;
+            jsonObject["lang"] = config->m_lang;
+            jsonObject["compileParams"] = config->m_compileParams;
+
+            QJsonDocument jsonDoc(jsonObject);
+            QFile file(exportFilePath);
+
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                qWarning() << "Failed to open export file for writing:" << exportFilePath;
+                return;
+            }
+
+            file.write(jsonDoc.toJson());
+            file.close();
+
+            qDebug() << "Config exported to:" << exportFilePath;
+            return;
+        }
+    }
+
+    qWarning() << "Config not found for export:" << configName;
+}
+
 void IAE::saveProjects() {
     if (!iae) {
         qWarning() << "iaeBackend not initialized.";

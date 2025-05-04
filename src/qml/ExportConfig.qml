@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs
 
 Dialog {
     id: exportConfigDialog
@@ -13,7 +14,19 @@ Dialog {
     property var configModel: [] // List of available configs
     property string selectedConfigName: ""
 
-    signal exportRequested(string configName, string exportFileName)
+    signal exportRequested(string configName, string exportFilePath)
+
+    FileDialog {
+        id: saveFileDialog
+        title: "Save Configuration As"
+        nameFilters: ["JSON files (*.json)"]
+        fileMode: FileDialog.SaveFile
+
+        onAccepted: {
+            exportRequested(selectedConfigName, saveFileDialog.fileUrl.toString().replace("file://", ""))
+            exportConfigDialog.close()
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -32,17 +45,6 @@ Dialog {
             onCurrentTextChanged: selectedConfigName = currentText
         }
 
-        Label {
-            text: "Export File Name:"
-            font.bold: true
-        }
-
-        TextField {
-            id: fileNameField
-            placeholderText: "e.g. config.json"
-            Layout.fillWidth: true
-        }
-
         Item { Layout.fillHeight: true }
 
         RowLayout {
@@ -52,10 +54,9 @@ Dialog {
             Button {
                 text: "Export"
                 Layout.preferredWidth: 80
-                enabled: selectedConfigName !== "" && fileNameField.text.length > 0
+                enabled: selectedConfigName !== ""
                 onClicked: {
-                    exportConfigDialog.exportRequested(selectedConfigName, fileNameField.text)
-                    exportConfigDialog.close()
+                    saveFileDialog.open()
                 }
             }
             Button {
