@@ -1,14 +1,16 @@
 #include "iae.h"
+
+#include "SQLite.h"
 #include "project.h"
-#include <iostream>
 #include <QDebug>
 #include <QDir>
-#include <utility>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
 #include <QFile>
 #include <QIODevice>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <iostream>
+#include <utility>
 
 /*
 TODO: x-y | x = is logic done, y = is it implemented
@@ -193,13 +195,24 @@ void IAE::loadConfigs(const QString &folderPath){
     qDebug() << "Loaded" << iae->m_configs.size() << "config(s) from folder.";
 }
 
-void IAE::loadProjects() {
-    // TODO: create project objects from db, add them to m_projects
-    qDebug("hoopla");
+void IAE::saveProjects() {
+    if (!iae) {
+        qWarning() << "iaeBackend not initialized.";
+        return;
+    }
+
+    SQLite::saveProjects(iae->m_projects);
+    qDebug() << "Projects saved through IAE::saveProjects.";
 }
 
-void IAE::saveProjects() { // all projects will be saved upon exit
-    // TODO: save contents of m_projects to db
+void IAE::loadProjects() {
+    if (!iae) {
+        qWarning() << "iaeBackend not initialized.";
+        return;
+    }
+
+    iae->m_projects = SQLite::loadProjects();
+    qDebug() << "Projects loaded into iae->m_projects.";
 }
 
 QQmlListProperty<Project> IAE::projects() {
