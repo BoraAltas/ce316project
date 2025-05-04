@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
 
+import iae
+
 Dialog {
     id: exportConfigDialog
     title: "Export Configuration"
@@ -16,14 +18,14 @@ Dialog {
 
     signal exportRequested(string configName, string exportFilePath)
 
-    FileDialog {
-        id: saveFileDialog
-        title: "Save Configuration As"
-        nameFilters: ["JSON files (*.json)"]
-        fileMode: FileDialog.SaveFile
+    FolderDialog {
+        id: saveFolderDialog
+        title: "Select Directory to Save Configuration"
 
         onAccepted: {
-            exportRequested(selectedConfigName, saveFileDialog.fileUrl.toString().replace("file://", ""))
+            //exportRequested(selectedConfigName, saveFolderDialog.folder + "/" + selectedConfigName + ".json")
+            let sanitizedPath = String(saveFolderDialog.currentFolder).replace("file://", "");
+            IAE.exportConfig(selectedConfigName, sanitizedPath + "/" + selectedConfigName + ".json")
             exportConfigDialog.close()
         }
     }
@@ -56,7 +58,7 @@ Dialog {
                 Layout.preferredWidth: 80
                 enabled: selectedConfigName !== ""
                 onClicked: {
-                    saveFileDialog.open()
+                    saveFolderDialog.open()
                 }
             }
             Button {

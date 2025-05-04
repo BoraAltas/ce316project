@@ -1,7 +1,7 @@
 #include "iae.h"
-#include "sourceCodeHandler.h"
 #include "SQLite.h"
 #include "project.h"
+#include "sourceCodeHandler.h"
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -9,8 +9,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSqlQuery>
 #include <iostream>
 #include <utility>
+#include <QSqlError>
 
 /*
 TODO: x-y | x = is logic done, y = is it implemented
@@ -70,7 +72,33 @@ void IAE::setStatus(const QString &status) { //write
 }
 
 void IAE::Initialize() {
-    // TODO: make a method to add every project to the m_projects list
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("example.db");
+
+    if (!db.open()) {
+        qWarning() << "Failed to open database:" << db.lastError().text();
+        return;
+    } else {
+        qDebug() << "Database connection opened successfully.";
+    }
+
+    QSqlQuery query;
+    if (!query.exec("CREATE TABLE IF NOT EXISTS Students ("
+                    "studentId TEXT PRIMARY KEY, "
+                    "result TEXT, "
+                    "success INTEGER, "
+                    "projectId INTEGER)")) {
+        qWarning() << "Failed to create Students table:" << query.lastError().text();
+                    }
+
+    if (!query.exec("CREATE TABLE IF NOT EXISTS Projects ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "name TEXT, "
+                    "studentId TEXT, "
+                    "FOREIGN KEY(studentId) REFERENCES Students(studentId))")) {
+        qWarning() << "Failed to create Projects table:" << query.lastError().text();
+                    }
+
     const QString folderPath = QDir::currentPath() + "/configs";
     loadConfigs(folderPath);
     loadProjects();

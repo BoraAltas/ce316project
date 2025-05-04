@@ -78,14 +78,7 @@ ApplicationWindow {
 
 
     menuBar: MenuBar {
-        Menu {
-            title: "File"
-            MenuItem { text: "New Project"
-                onTriggered: {
-                    newProjectDialog.visible = true
-                }
-            }
-        }
+
 
         Menu {
             title: "Configuration"

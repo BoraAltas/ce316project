@@ -2,6 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+import iae
+
 Dialog {
     id: importConfigDialog
     title: "Import Configuration"
@@ -39,7 +41,7 @@ Dialog {
                 Layout.preferredWidth: 80
                 enabled: filePathField.text.length > 0
                 onClicked: {
-                    importConfigDialog.importRequested(filePathField.text)
+                    IAE.importConfig(filePathField.text)
                     importConfigDialog.close()
                 }
             }

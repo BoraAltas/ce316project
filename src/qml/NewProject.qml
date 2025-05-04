@@ -48,12 +48,7 @@ Dialog {
                 Layout.fillWidth: true
             }
         }
-
-        Button {
-            text: "Browse"
-            onClicked: folderDialog.open()
-        }
-
+        
         Item {
             Layout.fillHeight: true
         }
