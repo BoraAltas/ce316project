@@ -49,13 +49,15 @@ ApplicationWindow {
         }
         visible: false
     }
-    RemoveConfig{
+    RemoveConfig {
         id: removeConfigDialog
         onConfigRemoved: (configName) => {
             console.log("Removed config:", configName)
-            //  remove from backend
+            IAE.removeConfig(configName)
+            removeConfigDialog.configModel = IAE.getConfigsAsVariantList()
+            configModel.clear()
+            IAE.getConfigsAsVariantList().forEach(config => configModel.append({ name: config.name }))
         }
-        visible: false
     }
     ImportConfig{
         id: importConfigDialog
@@ -103,11 +105,8 @@ ApplicationWindow {
             MenuItem {
                 text: "Remove"
                 onTriggered: {
-                    removeConfigDialog.configModel = [
-                        { name: "C Config", language: "C", compilerPath: "gcc" },
-                        { name: "Python Conf", language: "Python", compilerPath: "python" }
-                    ]
-                    removeConfigDialog.filteredConfigs = removeConfigDialog.allConfigs
+                    removeConfigDialog.configModel = IAE.getConfigsAsVariantList()
+                    removeConfigDialog.filteredConfigs = removeConfigDialog.configModel
                     removeConfigDialog.visible = true
                 }
             }

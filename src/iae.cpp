@@ -294,6 +294,25 @@ void IAE::exportConfig(const QString& configName, const QString& exportFilePath)
     qWarning() << "Config not found for export:" << configName;
 }
 
+void IAE::removeConfig(const QString &configName) {
+    for (int i = 0; i < iae->m_configs.size(); ++i) {
+        Config *config = iae->m_configs[i];
+        if (config->m_configName == configName) {
+            QString filePath = "configs/" + configName + ".json";
+            QFile::remove(filePath);
+
+            delete config;
+            iae->m_configs.removeAt(i);
+
+            qDebug() << "Config removed:" << configName;
+            Q_EMIT statusChanged();
+            return;
+        }
+    }
+
+    qWarning() << "Config not found for removal:" << configName;
+}
+
 void IAE::saveProjects() {
     if (!iae) {
         qWarning() << "iaeBackend not initialized.";

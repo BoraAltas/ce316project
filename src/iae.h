@@ -61,8 +61,10 @@ public:
     Q_INVOKABLE void editConfig(const QString& configName, const QString& lang, const QString& compileParams);
 
     Q_INVOKABLE QVariantList getConfigsAsVariantList() const;
+
     Q_INVOKABLE void importConfig(const QString& importFilePath);
     Q_INVOKABLE void exportConfig(const QString& configName, const QString& exportFilePath);
+    Q_INVOKABLE void removeConfig(const QString &configName);
 
     void saveAllConfigs();
     void loadConfigs(const QString &folderPath);
