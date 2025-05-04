@@ -11,6 +11,9 @@ set(CMAKE_AUTORCC ON)
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 
 find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core QuickDialogs2 Widgets)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Sql)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Quick Qml Sql Widgets)
 
 qt_standard_project_setup(REQUIRES 6.9)
 qt_policy(set QTP0001 NEW)
@@ -19,15 +22,20 @@ qt_policy(set QTP0004 NEW)
 add_subdirectory(src/zlib-1.3.1)
 
 set(PROJECT_SOURCES
-        src/main.cpp
-        src/iae.cpp
-        src/iae.h
-        src/project.cpp
-        src/project.h
-        src/student.cpp
-        src/student.h
-        src/zipHandler.cpp
-        src/zipHandler.h
+            src/main.cpp
+            src/iae.cpp
+            src/iae.h
+            src/sourceCodeHandler.cpp
+            src/sourceCodeHandler.h
+            src/project.cpp
+            src/project.h
+            src/student.cpp
+            src/student.h
+            src/zipHandler.cpp
+            src/zipHandler.h
+            src/sqlite3.c
+            src/SQLite.cpp
+            src/SQLite.h
 )
 
 set(MINIZIP_SOURCES
@@ -58,14 +66,18 @@ qt_add_executable(iae
 target_include_directories(iae
         PRIVATE
         src/zlib-1.3.1/contrib/minizip
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+
 )
 
 target_link_libraries(iae
         PRIVATE
         iaeQml
-        Qt6::Quick
-        Qt6::Gui
         Qt6::Core
+        Qt6::Gui
+        Qt6::Quick
+        Qt6::Qml
+        Qt6::Sql
         Qt6::QuickDialogs2
         Qt6::Widgets
         zlibstatic
