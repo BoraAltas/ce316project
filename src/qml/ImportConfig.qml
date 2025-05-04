@@ -35,6 +35,11 @@ Dialog {
             spacing: 20
 
             Button {
+                text: "Cancel"
+                Layout.preferredWidth: 80
+                onClicked: importConfigDialog.close()
+            }
+            Button {
                 text: "Import"
                 Layout.preferredWidth: 80
                 enabled: filePathField.text.length > 0
@@ -43,11 +48,7 @@ Dialog {
                     importConfigDialog.close()
                 }
             }
-            Button {
-                text: "Cancel"
-                Layout.preferredWidth: 80
-                onClicked: importConfigDialog.close()
-            }
+
         }
     }
 }

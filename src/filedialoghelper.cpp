@@ -16,7 +16,9 @@
 FileDialogHelper::FileDialogHelper(QObject *parent) : QObject(parent) {}
 
 void FileDialogHelper::openFileDialog() {
-    QString file = QFileDialog::getOpenFileName(nullptr, "Select a Zip File", "", tr("ZIP Archives (*.zip)"));
+    //QString file = QFileDialog::getOpenFileName(nullptr, "Select a Zip File", "", tr("ZIP Archives (*.zip)"));
+
+    QString file = QFileDialog::getOpenFileName(nullptr, "Select a File", "", tr("All Files (*.*)"));
 
     if (!file.isEmpty()) {
         m_selectedFile = file;

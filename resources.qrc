@@ -14,6 +14,8 @@
         <file>src/qml/images/help.png</file>
         <file>src/filedialoghelper.cpp</file>
         <file>src/filedialoghelper.h</file>
+        <file>src/qml/images/fileimage.png</file>
+
 
 
     </qresource>

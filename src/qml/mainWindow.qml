@@ -25,6 +25,7 @@ ApplicationWindow {
         visible: false
 
     }
+    /*
     NewProject{
         id:newProjectDialog
         visible: false
@@ -34,7 +35,7 @@ ApplicationWindow {
             console.log("Path:", path)
         }
 
-    }
+    }*/
     EditExistingConfig{
         id: editConfigDialog
         onConfigUpdated: (oldName, newName, language, compilerPath) => {
@@ -73,14 +74,14 @@ ApplicationWindow {
 
 
     menuBar: MenuBar {
-        Menu {
+        /*Menu {
             title: "File"
             MenuItem { text: "New Project"
                 onTriggered: {
                     newProjectDialog.visible = true
                 }
             }
-        }
+        }*/
 
         Menu {
             title: "Configuration"
@@ -194,17 +195,13 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Project Name:" }
-                    ComboBox {
-                        id: projectNameComboBox
+                    TextField {
+                        id: projectNameField
                         Layout.preferredWidth: 200
                         Layout.fillWidth: false
-
-                        model: [
-                            "Project A",
-                            "Project B",
-                            "Project C",
-                        ]
+                        placeholderText: "Enter project name"
                     }
+
 
                     Label { text: "Configuration:" }
                     ComboBox {
@@ -212,23 +209,47 @@ ApplicationWindow {
                         model: ["Select", "C", "C++", "Java", "Python"]
                     }
 
-                    Label { text: "Student ZIP Directory:"
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 20
-                            Button {
-                                text: "Open File"
-                                onClicked: {
-                                    fileDialogHelper.openFileDialog()
+                    Label { text: "Project File Directory:"}
+
+                        RowLayout {
+                            Layout.preferredWidth: 310
+                            spacing: 10
+
+                            TextField {
+                                id: zipFilePathField
+                                Layout.preferredWidth: 280
+                                placeholderText: "Choose project file..."
+                                text: fileDialogHelper.selectedFile
+                                readOnly: true
+                            }
+                            Rectangle {
+                                width: 25
+                                height: 20
+                                radius: 4
+                                color: "transparent"
+                                border.color: "#cccccc"
+                                border.width: 1
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/src/qml/images/fileimage.png"
+                                    width: 20
+                                    height: 20
+                                    fillMode: Image.PreserveAspectFit
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: fileDialogHelper.openFileDialog()
+
+                                    onEntered: parent.color = "#eeeeee"
+                                    onExited: parent.color = "transparent"
                                 }
                             }
-
                         }
 
-                    }
-                    TextField {
-                        Layout.preferredWidth: 200
-                        placeholderText: "Choose ZIP directory..." }
                 }
             }
 
@@ -243,12 +264,91 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Program Arguments:" }
-                    TextField { placeholderText: "e.g. input.txt output.txt" }
+
+                    RowLayout {
+                        Layout.preferredWidth: 310
+                        spacing: 10
+
+                        TextField {
+                            id: programArgsField
+                            Layout.preferredWidth: 280
+                            placeholderText: "e.g. input.txt output.txt"
+                        }
+
+                        Rectangle {
+                            width: 25
+                            height: 20
+                            radius: 4
+                            color: "transparent"
+                            border.color: "#cccccc"
+                            border.width: 1
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/src/qml/images/fileimage.png"
+                                width: 20
+                                height: 20
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    onClicked: programArgDialog.open()
+                                }
+
+                                onEntered: parent.color = "#eeeeee"
+                                onExited: parent.color = "transparent"
+                            }
+                        }
+                    }
 
                     Label { text: "Expected Output File:" }
-                    TextField { placeholderText: "e.g. expected.txt" }
+
+                    RowLayout {
+                        Layout.preferredWidth: 310
+                        spacing: 10
+
+                        TextField {
+                            id: expectedOutputField
+                            Layout.preferredWidth: 280
+                            placeholderText: "e.g. expected.txt"
+                        }
+
+                        Rectangle {
+                            width: 25
+                            height: 20
+                            radius: 4
+                            color: "transparent"
+                            border.color: "#cccccc"
+                            border.width: 1
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/src/qml/images/fileimage.png"
+                                width: 20
+                                height: 20
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    onClicked: expectedOutputDialog.open()
+                                }
+
+                                onEntered: parent.color = "#eeeeee"
+                                onExited: parent.color = "transparent"
+                            }
+                        }
+                    }
                 }
             }
+
 
             RowLayout {
                 spacing: 20
@@ -365,4 +465,23 @@ ApplicationWindow {
             }
         }
     }
+    FileDialog {
+        id: programArgDialog
+        title: "Select Program Arguments File"
+        nameFilters: ["Text Files (*.txt)", "All Files (*)"]
+        onAccepted: {
+            programArgsField.text = selectedFile
+        }
+    }
+
+    FileDialog {
+        id: expectedOutputDialog
+        title: "Select Expected Output File"
+        nameFilters: ["Text Files (*.txt)", "All Files (*)"]
+        onAccepted: {
+            expectedOutputField.text = selectedFile
+        }
+    }
+
+
 }

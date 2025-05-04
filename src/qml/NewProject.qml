@@ -1,7 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtQuick.Dialogs 6.2
+import QtQuick.Dialogs
+
 
 
 
@@ -21,8 +22,8 @@ Dialog {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 10
-        anchors.margins: 50
+        spacing: 30
+        anchors.margins: 40
 
         GridLayout {
             id: formLayout
@@ -41,25 +42,52 @@ Dialog {
             Label {
                 text: "Project Path:"
             }
-            TextField {
-                id: pathInput
-                text: newProjectDialog.selectedPath
-                onTextChanged: newProjectDialog.selectedPath = text
-                Layout.fillWidth: true
+            RowLayout {
+                Layout.preferredWidth: 200
+                spacing: 10
+
+                TextField {
+                    id: pathInput
+                    Layout.preferredWidth: 150
+                    text: newProjectDialog.selectedPath
+                    onTextChanged: newProjectDialog.selectedPath = text
+                    readOnly: true
+                    placeholderText: "Select a folder..."
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 4
+                    color: "transparent"
+                    border.color: "#cccccc"; border.width: 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/src/qml/images/fileimage.png"
+                        width: 20
+                        height: 20
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: folderDialog.open()
+
+                        onEntered: parent.color = "#eeeeee"
+                        onExited: parent.color = "transparent"
+                    }
+                }
             }
         }
 
-        Button {
-            text: "Browse"
-            onClicked: folderDialog.open()
-        }
-
-        Item {
-            Layout.fillHeight: true
-        }
         RowLayout {
             spacing: 20
             Layout.alignment: Qt.AlignRight
+            Button {
+                text: "Cancel"
+                onClicked: newProjectDialog.close()
+            }
             Button {
                 text: "Create"
                 onClicked: {
@@ -71,12 +99,17 @@ Dialog {
                     }
                 }
             }
-            Button {
-                text: "Cancel"
-                onClicked: newProjectDialog.close()
-            }
+
         }
     }
-  
+    FolderDialog {
+        id: folderDialog
+        title: "Select Project Folder"
+        onAccepted: {
+            newProjectDialog.selectedPath = folderDialog.selectedFolder
+            pathInput.text = folderDialog.selectedFolder
+        }
+    }
 
 }
+

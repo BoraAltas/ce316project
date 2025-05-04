@@ -48,7 +48,11 @@ Dialog {
         RowLayout {
             Layout.alignment: Qt.AlignRight
             spacing: 20
-
+            Button {
+                text: "Cancel"
+                Layout.preferredWidth: 80
+                onClicked: exportConfigDialog.close()
+            }
             Button {
                 text: "Export"
                 Layout.preferredWidth: 80
@@ -58,11 +62,7 @@ Dialog {
                     exportConfigDialog.close()
                 }
             }
-            Button {
-                text: "Cancel"
-                Layout.preferredWidth: 80
-                onClicked: exportConfigDialog.close()
-            }
+
         }
     }
 }
