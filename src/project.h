@@ -20,6 +20,7 @@ public:
     [[nodiscard]] QQmlListProperty<Student>getStudents();
 
     void setStudents(QQmlListProperty<Student> students);
+    void addStudent(Student*student);
     void setProjectName(const QString&projectName);
 
 private:

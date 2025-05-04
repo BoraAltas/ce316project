@@ -26,3 +26,9 @@ void Project::setStudents(QQmlListProperty<Student> students) {
         m_students.append(students.at(&students, i));
     }
 }
+
+void Project::addStudent(Student* student) {
+    if (student != nullptr) {
+        m_students.append(student);
+    }
+}
