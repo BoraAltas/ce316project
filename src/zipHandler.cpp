@@ -4,6 +4,7 @@
 
 #include "zipHandler.h"
 #include <QDebug>
+#include <QDirIterator>
 #include <QDir>
 #include <QFileDialog>
 #include <QFile>
@@ -27,20 +28,31 @@ void ZipHandler::setProjectName(const QString &name) {
     }
 }
 
-void ZipHandler::openFileDialog() {
-    QString file = QFileDialog::getOpenFileName(nullptr, "Select Zip File", "", tr("ZIP Archives (*.zip)"));
 
-    if (!file.isEmpty()) {
-        if (file.endsWith(".zip", Qt::CaseInsensitive)) {
-            m_selectedFile = {file};
-            qDebug() << "Processing zip file:" << file;
-            unzipFile(file);
-            emit selectedFileChanged();
-        } else {
-            qDebug() << "Skipped non-zip file:" << file;
-        }
+
+void ZipHandler::openFileDialog() {
+    QString folder = QFileDialog::getExistingDirectory(nullptr, "Select Folder Containing Zip Files", "");
+    if (folder.isEmpty()) {
+        qDebug() << "No folder selected";
+        return;
+    }
+
+    QDirIterator it(folder, QStringList() << "*.zip", QDir::Files, QDirIterator::Subdirectories);
+    bool foundAny = false;
+    while (it.hasNext()) {
+        QString zipFilePath = it.next();
+        foundAny = true;
+        m_selectedFile = zipFilePath;
+        qDebug() << "Processing zip file:" << zipFilePath;
+        unzipFile(zipFilePath);
+        emit selectedFileChanged();
+    }
+
+    if (!foundAny) {
+        qDebug() << "No zip files found in folder (including subfolders):" << folder;
     }
 }
+
 
 void ZipHandler::unzipFile(const QString &zipFilePath) {
     if (m_projectName.isEmpty()) {

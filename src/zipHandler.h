@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QString>
 #include <zlib.h>
+#include "unzip.h"
 
 class ZipHandler : public QObject {
     Q_OBJECT
