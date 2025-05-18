@@ -69,6 +69,11 @@ Dialog {
             spacing: 20
 
             Button {
+                text: "Cancel"
+                Layout.preferredWidth: 80
+                onClicked: removeConfigDialog.close()
+            }
+            Button {
                 text: "Remove"
                 Layout.preferredWidth: 80
                 enabled: selectedConfigName !== ""
@@ -79,11 +84,7 @@ Dialog {
                     }
                 }
             }
-            Button {
-                text: "Cancel"
-                Layout.preferredWidth: 80
-                onClicked: removeConfigDialog.close()
-            }
+
         }
     }
 }

@@ -58,6 +58,9 @@ ApplicationWindow {
             configModel.clear()
             IAE.getConfigsAsVariantList().forEach(config => configModel.append({ name: config.name }))
         }
+        ////////////
+      //  visible: false
+        ////////////
     }
     ImportConfig{
         id: importConfigDialog
@@ -74,7 +77,6 @@ ApplicationWindow {
             IAE.exportConfig(configName, filePath)
         }
     }
-
 
 
     menuBar: MenuBar {
@@ -219,19 +221,47 @@ ApplicationWindow {
                         }
                     }
 
-                    Label { text: "Student ZIP Directory:" }
-                    TextField {
-                        id: zipDirectoryField
-                        Layout.preferredWidth: 200
-                        placeholderText: "Choose ZIP directory..." }
+                    Label { text: "Student ZIP Directory:"}
 
-                    Button { text: "Open File"
+                        RowLayout {
+                            Layout.preferredWidth: 310
+                            spacing: 10
 
-                        onClicked: {
-                            zipHandler.openFileDialog()
-                            zipDirectoryField.text = zipHandler.selectedFile
+                            TextField {
+                                id: zipFilePathField
+                                Layout.preferredWidth: 280
+                                placeholderText: "Choose project file..."
+                                text: fileDialogHelper.selectedFile
+                                readOnly: true
+                            }
+                            Rectangle {
+                                width: 25
+                                height: 20
+                                radius: 4
+                                color: "transparent"
+                                border.color: "#cccccc"
+                                border.width: 1
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: "qrc:/src/qml/images/fileimage.png"
+                                    width: 20
+                                    height: 20
+                                    fillMode: Image.PreserveAspectFit
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: fileDialogHelper.openFileDialog()
+
+                                    onEntered: parent.color = "#eeeeee"
+                                    onExited: parent.color = "transparent"
+                                }
+                            }
                         }
-                    }
+
                 }
             }
 
@@ -251,10 +281,90 @@ ApplicationWindow {
                         placeholderText: "e.g. input"
                     }
 
+                    RowLayout {
+                        Layout.preferredWidth: 310
+                        spacing: 10
+
+                        TextField {
+                            id: programArgsField
+                            Layout.preferredWidth: 280
+                            placeholderText: "e.g. input.txt output.txt"
+                        }
+
+                        Rectangle {
+                            width: 25
+                            height: 20
+                            radius: 4
+                            color: "transparent"
+                            border.color: "#cccccc"
+                            border.width: 1
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/src/qml/images/fileimage.png"
+                                width: 20
+                                height: 20
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    onClicked: programArgDialog.open()
+                                }
+
+                                onEntered: parent.color = "#eeeeee"
+                                onExited: parent.color = "transparent"
+                            }
+                        }
+                    }
+
                     Label { text: "Expected Output File:" }
                     TextField {
                         id: expectedOutputField
                         placeholderText: "e.g. expected"
+                    }
+
+                    RowLayout {
+                        Layout.preferredWidth: 310
+                        spacing: 10
+
+                        TextField {
+                            id: expectedOutputField
+                            Layout.preferredWidth: 280
+                            placeholderText: "e.g. expected.txt"
+                        }
+
+                        Rectangle {
+                            width: 25
+                            height: 20
+                            radius: 4
+                            color: "transparent"
+                            border.color: "#cccccc"
+                            border.width: 1
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "qrc:/src/qml/images/fileimage.png"
+                                width: 20
+                                height: 20
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    onClicked: expectedOutputDialog.open()
+                                }
+
+                                onEntered: parent.color = "#eeeeee"
+                                onExited: parent.color = "transparent"
+                            }
+                        }
                     }
                 }
             }
@@ -450,4 +560,23 @@ ApplicationWindow {
             }
         }
     }
+    FileDialog {
+        id: programArgDialog
+        title: "Select Program Arguments File"
+        nameFilters: ["Text Files (*.txt)", "All Files (*)"]
+        onAccepted: {
+            programArgsField.text = selectedFile
+        }
+    }
+
+    FileDialog {
+        id: expectedOutputDialog
+        title: "Select Expected Output File"
+        nameFilters: ["Text Files (*.txt)", "All Files (*)"]
+        onAccepted: {
+            expectedOutputField.text = selectedFile
+        }
+    }
+
+
 }

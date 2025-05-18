@@ -36,6 +36,8 @@ set(PROJECT_SOURCES
             src/sqlite3.c
             src/SQLite.cpp
             src/SQLite.h
+            src/filedialoghelper.cpp
+            src/filedialoghelper.h
 )
 
 set(MINIZIP_SOURCES
@@ -55,11 +57,15 @@ qt_add_qml_module(
         src/qml/RemoveConfig.qml
         src/qml/ImportConfig.qml
         src/qml/ExportConfig.qml
+
 )
 
 qt_add_executable(iae
         ${PROJECT_SOURCES}
         ${MINIZIP_SOURCES}
+        #src/main.cpp
+        #src/filedialoghelper.cpp
+        #src/filedialoghelper.h
         resources.qrc
 )
 

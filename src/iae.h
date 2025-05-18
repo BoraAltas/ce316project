@@ -54,6 +54,7 @@ public:
     [[nodiscard]] QQmlListProperty<Config> configs();
 
     Q_INVOKABLE void createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput);
+    Q_INVOKABLE QString openFileDialog();
     Q_INVOKABLE void setStatus(const QString &status);
     Q_INVOKABLE void Initialize();
     Q_INVOKABLE void saveConfig(QString configName, QString lang, QString compileParams);

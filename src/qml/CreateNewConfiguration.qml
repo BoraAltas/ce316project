@@ -1,6 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs
+
+
 import iae 1.0
 
 Dialog {
@@ -41,11 +44,39 @@ Dialog {
                 onActivated: if (currentIndex === -1) currentIndex = -1
             }
 
-            Label { text: "Compiler/Interpreter options:" }
-            TextField {
-                id: compilerParamsField
-                placeholderText: "e.g. C:/MinGW/bin/gcc.exe"
-                Layout.fillWidth: true
+            Label { text: "Compiler Path:" }
+            RowLayout {
+                Layout.preferredWidth: 250
+                spacing: 10
+                TextField {
+                    id: compilerPathField
+                    Layout.preferredWidth: 150
+                    placeholderText: "e.g. C:/MinGW/bin/gcc.exe"
+                    readOnly: true
+                }
+
+                Rectangle {
+                    width: 30; height: 30; radius: 4
+                    color: "transparent"
+                    border.color: "#cccccc"; border.width: 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/src/qml/images/fileimage.png"
+                        width: 20; height: 20
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: compilerFileDialog.open()
+
+                        onEntered: parent.color = "#eeeeee"
+                        onExited: parent.color = "transparent"
+                    }
+                }
             }
         }
 
@@ -59,6 +90,11 @@ Dialog {
             spacing: 20
 
             Button {
+                text: "Cancel"
+                Layout.preferredWidth: 80
+                onClicked: createConfigDialog.close()
+            }
+            Button {
                 text: "Create"
                 Layout.preferredWidth: 80
                 enabled: languageComboBox.currentIndex >= 0
@@ -71,11 +107,15 @@ Dialog {
                     createConfigDialog.close()
                 }
             }
-            Button {
-                text: "Cancel"
-                Layout.preferredWidth: 80
-                onClicked: createConfigDialog.close()
-            }
+
+        }
+    }
+    FileDialog {
+        id: compilerFileDialog
+        title: "Select Compiler Executable"
+        nameFilters: ["Executable Files (*.exe)", "All Files (*)"]
+        onAccepted: {
+            compilerPathField.text = compilerFileDialog.selectedFile
         }
     }
 }

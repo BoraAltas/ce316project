@@ -12,6 +12,7 @@
 #include <QSqlQuery>
 #include <iostream>
 #include <utility>
+#include <QFileDialog>
 #include <QSqlError>
 
 /*
@@ -51,6 +52,10 @@ public:
 };
 
 IAE::IAE(QObject *parent) : QObject(parent), iae(std::make_unique<iaeBackend>()) {} //constructor
+
+QString IAE::openFileDialog() {
+    return QFileDialog::getOpenFileName(nullptr, "Select File", "", "All Files (*.*)");
+}
 
 IAE::~IAE() { //destructor , todo
     std::cout << "hello!";

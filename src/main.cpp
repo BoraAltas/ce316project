@@ -9,7 +9,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QIcon>
-
+#include "filedialoghelper.h"
 
 int main(int argc, char* argv[]) {
 
@@ -26,6 +26,9 @@ int main(int argc, char* argv[]) {
 
     ZipHandler zipHandler;
     engine.rootContext()->setContextProperty("zipHandler", &zipHandler);
+    // QFileDialog'ı QML'de kullanmak için context property olarak ekleniyor
+    FileDialogHelper fileDialogHelper;
+    engine.rootContext()->setContextProperty("fileDialogHelper", &fileDialogHelper);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      []() { QCoreApplication::exit(-1); },
