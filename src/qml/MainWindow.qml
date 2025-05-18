@@ -276,10 +276,7 @@ ApplicationWindow {
                     anchors.fill: parent
 
                     Label { text: "Program Arguments:" }
-                    TextField {
-                        id: programArgsField
-                        placeholderText: "e.g. input"
-                    }
+
 
                     RowLayout {
                         Layout.preferredWidth: 310
@@ -322,10 +319,7 @@ ApplicationWindow {
                     }
 
                     Label { text: "Expected Output File:" }
-                    TextField {
-                        id: expectedOutputField
-                        placeholderText: "e.g. expected"
-                    }
+
 
                     RowLayout {
                         Layout.preferredWidth: 310
