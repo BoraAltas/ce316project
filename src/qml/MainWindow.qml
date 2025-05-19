@@ -253,8 +253,7 @@ ApplicationWindow {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: fileDialogHelper.openFileDialog()
-
+                                    onClicked: zipDirectoryDialog.open()
                                     onEntered: parent.color = "#eeeeee"
                                     onExited: parent.color = "transparent"
                                 }
@@ -372,7 +371,7 @@ ApplicationWindow {
                     onClicked: {
                         IAE.isEmpty()
                         zipHandler.setProjectName(projectNameField.text)
-                        zipHandler.unzipFile(zipFilePathField.text)
+                        zipHandler.openFile(zipFilePathField.text)
                         IAE.createProject(
                             projectNameField.text,
                             configComboBox.currentText,
@@ -381,6 +380,8 @@ ApplicationWindow {
                             isArgsFile,
                             isOutputFile
                         )
+                        isArgsFolder: false
+                        isOutputFolder: false
                     }
                 }
 
@@ -582,7 +583,7 @@ ApplicationWindow {
         nameFilters: ["Text Files (*.txt)", "All Files (*)"]
         onAccepted: {
             isArgsFile = true
-            programArgsField.text = selectedFile.toString().substring(7)
+            programArgsField.text = selectedFile.toString().substring(8)
         }
     }
 
@@ -592,9 +593,15 @@ ApplicationWindow {
         nameFilters: ["Text Files (*.txt)", "All Files (*)"]
         onAccepted: {
             isOutputFile = true
-            expectedOutputField.text = selectedFile.toString().substring(7)
+            expectedOutputField.text = selectedFile.toString().substring(8)
         }
     }
 
-
+    FolderDialog {
+        id: zipDirectoryDialog
+        title: "Select the directory of the project"
+        onAccepted: {
+            zipFilePathField.text = selectedFolder.toString().substring(8)
+        }
+    }
 }

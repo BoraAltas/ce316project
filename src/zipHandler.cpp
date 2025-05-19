@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QDir>
-#include <QFileDialog>
 #include <QFile>
 #include <QCoreApplication>
 #include "unzip.h"
@@ -28,12 +27,8 @@ void ZipHandler::setProjectName(const QString &name) {
     }
 }
 
-void ZipHandler::openFileDialog() {
-    QString folder = QFileDialog::getExistingDirectory(nullptr, "Select Folder Containing Zip Files", "");
-    if (folder.isEmpty()) {
-        qDebug() << "No folder selected";
-        return;
-    }
+void ZipHandler::openFile(const QString &filePath) {
+    QString folder = filePath;
 
     QDirIterator it(folder, QStringList() << "*.zip", QDir::Files, QDirIterator::Subdirectories);
     bool foundAny = false;
@@ -59,7 +54,7 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
 
     QString zipBaseName = QFileInfo(zipFilePath).baseName();
 
-    QDir unzipDir(QDir::currentPath() + "/unzip/");
+    QDir unzipDir(QDir::currentPath() + "/unzip/" + m_projectName + "/");
     if (!unzipDir.exists() && !unzipDir.mkpath(".")) {
         qDebug() << "Failed to create target directory:" << unzipDir.absolutePath();
         return;
@@ -95,7 +90,7 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
             continue;
         }
 
-        QString fullPath = unzipDir.filePath(zipBaseName + "/" + relativePath);
+        QString fullPath = unzipDir.filePath(relativePath);
 
         if (filename[strlen(filename) - 1] == '/') {
             QDir().mkpath(fullPath);

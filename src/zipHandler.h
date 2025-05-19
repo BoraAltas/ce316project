@@ -18,7 +18,7 @@ class ZipHandler : public QObject {
 public:
     explicit ZipHandler(QObject *parent = nullptr);
 
-    Q_INVOKABLE void openFileDialog();
+    Q_INVOKABLE void openFile(const QString &filePath);
 
     QString selectedFile() const;
     QString projectName() const;
