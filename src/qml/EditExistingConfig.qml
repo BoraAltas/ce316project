@@ -89,36 +89,14 @@ Dialog {
                 onActivated: if (currentIndex === -1) currentIndex = -1
             }
 
-            Label { text: "Compiler Path:" }
+            Label { text: "Compile/Interpret Parameter:" }
             RowLayout{
                 Layout.fillWidth: true
                 spacing: 10
                 TextField {
                     id: compileParamsField
-                    placeholderText: "Path to compiler"
+                    placeholderText: "Parameters"
                     Layout.fillWidth: true
-                }
-                Rectangle {
-                    width: 30; height: 30; radius: 4
-                    color: "transparent"
-                    border.color: "#cccccc"; border.width: 1
-
-                    Image {
-                        anchors.centerIn: parent
-                        source: "qrc:/src/qml/images/fileimage.png"
-                        width: 20; height: 20
-                        fillMode: Image.PreserveAspectFit
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: compilerFileDialog.open()
-
-                        onEntered: parent.color = "#eeeeee"
-                        onExited: parent.color = "transparent"
-                    }
                 }
             }
         }
@@ -159,11 +137,5 @@ Dialog {
             }
 
         }
-    }
-    FileDialog {
-        id: compilerFileDialog
-        title: "Select Compiler Executable"
-        nameFilters: ["Executable Files (*.exe)", "All Files (*)"]
-        onAccepted: compileParamsField.text = compilerFileDialog.selectedFile
     }
 }

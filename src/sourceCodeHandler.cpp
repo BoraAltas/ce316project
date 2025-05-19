@@ -7,11 +7,15 @@
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
+#include <QtConcurrent>
+#include <QTimer>
+#include <QEventLoop>
 
 sourceCodeHandler::sourceCodeHandler(QObject *parent) : QObject(parent){}
 
 sourceCodeHandler::~sourceCodeHandler() = default;
 //TYPECHECK NEEDED
+
 Project* sourceCodeHandler::compileAndRunAllFiles(const QString& projectName, const QString& folderPath,const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput) {
     QDir dir(folderPath);
     if (!dir.exists()) {
@@ -44,19 +48,25 @@ Project* sourceCodeHandler::compileAndRunAllFiles(const QString& projectName, co
         filePaths << it.next();
     }
 
+    QList<QFuture<void>> futures;
     for (const QString& file : filePaths) {
-        Student* student = compileAndRunFile(file, l_language, compilerParams, programArgs, expectedOutput);
+        Student* student = new Student(QFileInfo(file).fileName(), "", false);
         m_project->addStudent(student);
+
+        futures.append(QtConcurrent::run([=]() {
+            this->compileAndRunFile(file, l_language, compilerParams, programArgs, expectedOutput, student);
+        }));
+    }
+
+    for (auto& future : futures) {
+        future.waitForFinished();
     }
 
     return m_project;
 }
 
-Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput)
-{
+void sourceCodeHandler::compileAndRunFile(const QString& filePath, const QString& language, const QString& compilerParams, const QStringList& programArgs, const QString& expectedOutput, Student* student) {
     const QString compiler = determineCompiler(language);
-    QProcess process;
-
     QString command = compiler;
     QStringList arguments = compilerParams.split(' ', Qt::SkipEmptyParts);
 
@@ -69,36 +79,63 @@ Student* sourceCodeHandler::compileAndRunFile(const QString& filePath, const QSt
             arguments << filePath;
         }
 
+        QProcess process;
         process.start(command, arguments);
         if (!process.waitForFinished()) {
             qWarning() << "Error while compiling Java file:" << filePath;
-            return new Student(filePath, "Error while compiling", false);
+            student->setResult("Error while compiling");
+            student->setSuccess(false);
         }
 
         arguments.clear();
         arguments << className << programArgs;
         command = "java";
-        qDebug() << arguments;
-        qDebug() << command;
     } else if (language == "python") {
         command = "python";
         arguments << filePath << programArgs;
     } else {
         qWarning() << "Unsupported language: " << language;
-        return nullptr;
+        student->setResult("Unsupported language");
+        student->setSuccess(false);
+        return;
     }
 
+    QProcess process;
     process.setWorkingDirectory(QFileInfo(filePath).absolutePath());
+
+    QTimer timer;
+    timer.setSingleShot(true);
+    QEventLoop loop;
+
+    connect(&timer, &QTimer::timeout, [&]() {
+        if (process.state() == QProcess::Running) {
+            process.kill();
+            qWarning() << "Process timed out and was terminated:" << filePath;
+        }
+        loop.quit();
+    });
+
+    connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [&]() {
+        loop.quit();
+    });
+
     process.start(command, arguments);
-    if (!process.waitForFinished()) {
-        qWarning() << "Error while running the file:" << filePath;
-        return new Student(filePath, "Error while compiling", false);
+    timer.start(1000); // 10 seconds timeout
+    loop.exec();
+
+    if (process.state() == QProcess::Running) {
+        process.kill();
+        student->setSuccess(false);
+        student->setResult("Error: Process timed out");
+        return;
     }
 
     const QString output = process.readAllStandardOutput() + process.readAllStandardError();
     const bool success = (!expectedOutput.isEmpty() && output.trimmed() == expectedOutput.trimmed());
     qDebug() << "Studentname:" << filePath << "Output:" << output << "Success:" << success << "Expected:" << expectedOutput;
-    return new Student(QFileInfo(QFileInfo(filePath).absolutePath()).fileName(), output, success);
+
+    student->setSuccess(success);
+    student->setResult(output);
 }
 
 

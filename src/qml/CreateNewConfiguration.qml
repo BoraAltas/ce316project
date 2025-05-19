@@ -9,7 +9,7 @@ import iae 1.0
 Dialog {
     id: createConfigDialog
     title: "Create New Configuration"
-    width: 450
+    width: 550
     height: 350
     modal: true
     anchors.centerIn: parent
@@ -19,13 +19,13 @@ Dialog {
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
-        anchors.margins: 50
+        anchors.margins: 40
 
         GridLayout {
             id: formLayout
             columns: 2
-            columnSpacing: 30
-            rowSpacing: 40
+            columnSpacing: 25
+            rowSpacing: 30
             Layout.fillWidth: true
 
             Label { text: "Configuration Name:" }
@@ -44,38 +44,14 @@ Dialog {
                 onActivated: if (currentIndex === -1) currentIndex = -1
             }
 
-            Label { text: "Compiler Path:" }
+            Label { text: "Compile/Interpret Parameters:" }
             RowLayout {
                 Layout.preferredWidth: 250
                 spacing: 10
                 TextField {
-                    id: compilerPathField
+                    id: compilerParamsField
                     Layout.preferredWidth: 150
-                    placeholderText: "e.g. C:/MinGW/bin/gcc.exe"
-                    readOnly: true
-                }
-
-                Rectangle {
-                    width: 30; height: 30; radius: 4
-                    color: "transparent"
-                    border.color: "#cccccc"; border.width: 1
-
-                    Image {
-                        anchors.centerIn: parent
-                        source: "qrc:/src/qml/images/fileimage.png"
-                        width: 20; height: 20
-                        fillMode: Image.PreserveAspectFit
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: compilerFileDialog.open()
-
-                        onEntered: parent.color = "#eeeeee"
-                        onExited: parent.color = "transparent"
-                    }
+                    placeholderText: "e.g. -o output"
                 }
             }
         }
@@ -108,14 +84,6 @@ Dialog {
                 }
             }
 
-        }
-    }
-    FileDialog {
-        id: compilerFileDialog
-        title: "Select Compiler Executable"
-        nameFilters: ["Executable Files (*.exe)", "All Files (*)"]
-        onAccepted: {
-            compilerPathField.text = compilerFileDialog.selectedFile
         }
     }
 }

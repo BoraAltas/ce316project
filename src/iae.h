@@ -40,7 +40,6 @@ class IAE : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(QString status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(QQmlListProperty<Project> projects READ projects NOTIFY projectsChanged)
     Q_PROPERTY(QQmlListProperty<Config> configs READ configs NOTIFY configsChanged)
 
@@ -49,13 +48,11 @@ public:
     ~IAE() override;
     Q_INVOKABLE void isEmpty();
 
-    [[nodiscard]] QString status() const; // [[nodiscard]] means the caller must use the return value, can't just call it for funzies
     [[nodiscard]] QQmlListProperty<Project> projects();
     [[nodiscard]] QQmlListProperty<Config> configs();
 
-    Q_INVOKABLE void createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput);
+    Q_INVOKABLE void createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput, const bool isArgsFile, const bool isOutputFile);
     Q_INVOKABLE QString openFileDialog();
-    Q_INVOKABLE void setStatus(const QString &status);
     Q_INVOKABLE void Initialize();
     Q_INVOKABLE void saveConfig(QString configName, QString lang, QString compileParams);
     Q_INVOKABLE void saveProjects();

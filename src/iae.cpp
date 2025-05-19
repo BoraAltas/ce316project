@@ -46,7 +46,6 @@ Our dearest friend kocakalp will solve this. Bless his soul <3.
 
 class iaeBackend {
 public:
-    QString m_status; // for example
     QList<Project*> m_projects;
     QList<Config*> m_configs;
 };
@@ -59,21 +58,12 @@ QString IAE::openFileDialog() {
 
 IAE::~IAE() { //destructor , todo
     std::cout << "hello!";
-    //close connections when necessary.
+
 }
 
 void IAE::isEmpty() {
     qDebug() << iae->m_projects.isEmpty();
     qDebug() << iae->m_projects.size();
-}
-QString IAE::status() const { //read
-    return iae->m_status;
-}
-
-void IAE::setStatus(const QString &status) { //write
-    iae->m_status = status;
-    qDebug() << iae->m_status;
-    Q_EMIT statusChanged(); //notify
 }
 
 void IAE::Initialize() {
@@ -153,6 +143,7 @@ void IAE::saveConfig(QString configName, QString lang, QString compileParams) {
     }
 
     iae->m_configs.append(config.release());
+    Q_EMIT configsChanged();
 }
 
 void IAE::saveAllConfigs() {
@@ -169,6 +160,7 @@ void IAE::editConfig(const QString& configName, const QString& lang, const QStri
             cfg->m_compileParams = compileParams;
             saveConfig(cfg->m_configName, cfg->m_lang, cfg->m_compileParams);
             qDebug() << "Config updated:" << configName;
+            Q_EMIT configsChanged();
             return;
         }
     }
@@ -232,6 +224,7 @@ void IAE::loadConfigs(const QString &folderPath){
         iae->m_configs.append(config.release());
     }
 
+    Q_EMIT configsChanged();
     qDebug() << "Loaded" << iae->m_configs.size() << "config(s) from folder.";
 }
 
@@ -338,7 +331,7 @@ void IAE::removeConfig(const QString &configName) {
             iae->m_configs.removeAt(i);
 
             qDebug() << "Config removed:" << configName;
-            Q_EMIT statusChanged();
+            Q_EMIT configsChanged();
             return;
         }
     }
@@ -374,26 +367,57 @@ QQmlListProperty<Config> IAE::configs() {
     return {this,&iae->m_configs};
 }
 
-void IAE::createProject(const QString& projectName, const QString& configName, const QStringList&programArgs, const QString&expectedOutput) {
+void IAE::createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput, const bool isArgsFile, const bool isOutputFile) {
+    qDebug() << "isArgsFile:" << isArgsFile << ", isOutputFile:" << isOutputFile;
+
     sourceCodeHandler handler;
-    const Config* conf = nullptr;
-    qDebug() << "Configname:" << configName;
-    for (Config* cfg : iae->m_configs) {
-        if (cfg->m_configName == configName) {
-            conf = cfg;
-            break;
+        const Config* conf = nullptr;
+        qDebug() << "Configname:" << configName;
+        for (Config* cfg : iae->m_configs) {
+            if (cfg->m_configName == configName) {
+                conf = cfg;
+                break;
+            }
         }
-    }
-    if (conf == nullptr) {
-        qWarning() << "Config with name" << configName << "not found.";
-        return;
-    }
-    qDebug() << "lang:" << conf->m_lang;
-    QString projectPath = QDir::currentPath() + "/unzip/" + projectName;
-    Project* project = handler.compileAndRunAllFiles(projectName, projectPath, conf->m_lang, conf->m_compileParams, programArgs, expectedOutput);
-    if (project != nullptr) {
-        iae->m_projects.append(project);
-        Q_EMIT projectsChanged();
-        qDebug() << "Projects created:" << project->getProjectName();
-    }
+        if (conf == nullptr) {
+            qWarning() << "Config with name" << configName << "not found.";
+            return;
+        }
+        qDebug() << "lang:" << conf->m_lang;
+
+        QStringList mutableProgramArgs = programArgs;
+        QString mutableExpectedOutput = expectedOutput;
+
+        if (isArgsFile) {
+            QFile argsFile(mutableProgramArgs.first());
+            if (argsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                mutableProgramArgs.clear();
+                while (!argsFile.atEnd()) {
+                    mutableProgramArgs.append(argsFile.readLine().trimmed());
+                }
+                argsFile.close();
+            } else {
+                qWarning() << "Failed to open program arguments file:" << mutableProgramArgs.first();
+                return;
+            }
+        }
+
+        if (isOutputFile) {
+            QFile outputFile(mutableExpectedOutput);
+            if (outputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                mutableExpectedOutput = outputFile.readAll().trimmed();
+                outputFile.close();
+            } else {
+                qWarning() << "Failed to open expected output file:" << mutableExpectedOutput;
+                return;
+            }
+        }
+
+        QString projectPath = QDir::currentPath() + "/unzip/" + projectName;
+        Project* project = handler.compileAndRunAllFiles(projectName, projectPath, conf->m_lang, conf->m_compileParams, mutableProgramArgs, mutableExpectedOutput);
+        if (project != nullptr) {
+            iae->m_projects.append(project);
+            Q_EMIT projectsChanged();
+            qDebug() << "Projects created:" << project->getProjectName();
+        }
 }

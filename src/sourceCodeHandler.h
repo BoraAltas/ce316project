@@ -22,7 +22,7 @@ public:
         void compilationFinished(const QString& result);
 
 private:
-    Student* compileAndRunFile(const QString&filePath, const QString&language, const QString& compilerParams, const QStringList&programArgs, const QString&expectedOutput);
+    void compileAndRunFile(const QString&filePath, const QString&language, const QString& compilerParams, const QStringList&programArgs, const QString&expectedOutput, Student* student);
     QString determineCompiler(const QString& config) ;
 };
 

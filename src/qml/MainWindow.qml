@@ -12,6 +12,9 @@ ApplicationWindow {
     title: "AssignCheck"
     color: "#f5f5f5"
 
+    property bool isArgsFile: false
+    property bool isOutputFile: false
+
     Component.onCompleted: {
             IAE.Initialize()
     }
@@ -122,11 +125,7 @@ ApplicationWindow {
             }
             MenuItem {
                 onTriggered: {
-                    exportConfigDialog.configModel = [
-                        { name: "C Config", language: "C", compilerPath: "C:/MinGW/bin/gcc.exe" },
-                        { name: "Python Conf", language: "Python", compilerPath: "python" }
-                        // fill it properly from your real config list
-                    ]
+                    exportConfigDialog.configModel = IAE.getConfigsAsVariantList().map(config => ({ name: config.name }));
                     exportConfigDialog.visible = true
                 }
                 contentItem: Row {
@@ -232,7 +231,7 @@ ApplicationWindow {
                                 Layout.preferredWidth: 280
                                 placeholderText: "Choose project file..."
                                 text: fileDialogHelper.selectedFile
-                                readOnly: true
+                                readOnly: false
                             }
                             Rectangle {
                                 width: 25
@@ -285,7 +284,8 @@ ApplicationWindow {
                         TextField {
                             id: programArgsField
                             Layout.preferredWidth: 280
-                            placeholderText: "e.g. input.txt output.txt"
+                            placeholderText: "e.g: Mark 2123, output.txt"
+                            readOnly: isArgsFile
                         }
 
                         Rectangle {
@@ -328,7 +328,8 @@ ApplicationWindow {
                         TextField {
                             id: expectedOutputField
                             Layout.preferredWidth: 280
-                            placeholderText: "e.g. expected.txt"
+                            placeholderText: "e.g: Hello World!, expected.txt"
+                            readOnly: isOutputFile
                         }
 
                         Rectangle {
@@ -371,12 +372,14 @@ ApplicationWindow {
                     onClicked: {
                         IAE.isEmpty()
                         zipHandler.setProjectName(projectNameField.text)
-                        zipHandler.unzipFile(zipDirectoryField.text)
+                        zipHandler.unzipFile(zipFilePathField.text)
                         IAE.createProject(
                             projectNameField.text,
                             configComboBox.currentText,
                             programArgsField.text,
-                            expectedOutputField.text
+                            expectedOutputField.text,
+                            isArgsFile,
+                            isOutputFile
                         )
                     }
                 }
@@ -578,7 +581,8 @@ ApplicationWindow {
         title: "Select Program Arguments File"
         nameFilters: ["Text Files (*.txt)", "All Files (*)"]
         onAccepted: {
-            programArgsField.text = selectedFile
+            isArgsFile = true
+            programArgsField.text = selectedFile.toString().substring(7)
         }
     }
 
@@ -587,7 +591,8 @@ ApplicationWindow {
         title: "Select Expected Output File"
         nameFilters: ["Text Files (*.txt)", "All Files (*)"]
         onAccepted: {
-            expectedOutputField.text = selectedFile
+            isOutputFile = true
+            expectedOutputField.text = selectedFile.toString().substring(7)
         }
     }
 

@@ -12,8 +12,6 @@ class Student;
 class Project;
 class SQLite final {
 public:
-    static void saveStudents(const QList<Student*>& students, int projectId);
-    static QList<Student*> loadStudents();
     static void saveProjects(const QList<Project*>& projects);
     static QList<Project*> loadProjects();
 };

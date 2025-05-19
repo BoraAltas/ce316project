@@ -10,10 +10,7 @@ set(CMAKE_AUTORCC ON)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core QuickDialogs2 Widgets)
-find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core)
-find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core Sql)
-find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Quick Qml Sql Widgets)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Quick Gui Core QuickDialogs2 Widgets Qml Sql Widgets Concurrent)
 
 qt_standard_project_setup(REQUIRES 6.9)
 qt_policy(set QTP0001 NEW)
@@ -86,6 +83,7 @@ target_link_libraries(iae
         Qt6::Sql
         Qt6::QuickDialogs2
         Qt6::Widgets
+        Qt6::Concurrent
         zlibstatic
 )
 
