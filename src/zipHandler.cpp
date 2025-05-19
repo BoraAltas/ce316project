@@ -54,7 +54,7 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
 
     QString zipBaseName = QFileInfo(zipFilePath).baseName();
 
-    QDir unzipDir(QDir::currentPath() + "/unzip/" + m_projectName + "/");
+    QDir unzipDir(QDir::currentPath() + "/unzip/" + m_projectName + "/" + zipBaseName + "/");
     if (!unzipDir.exists() && !unzipDir.mkpath(".")) {
         qDebug() << "Failed to create target directory:" << unzipDir.absolutePath();
         return;
@@ -84,6 +84,7 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
         }
 
         QString relativePath = QString::fromUtf8(filename);
+        qDebug() << "Extracting file:" << relativePath;
 
         if (relativePath.startsWith("_MACOSX") || relativePath.contains("/_MACOSX")) {
             qDebug() << "Skipping system folder:" << relativePath;
@@ -91,9 +92,12 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
         }
 
         QString fullPath = unzipDir.filePath(relativePath);
+        qDebug() << "Full path for extraction:" << fullPath;
 
         if (filename[strlen(filename) - 1] == '/') {
-            QDir().mkpath(fullPath);
+            if (!QDir().mkpath(fullPath)) {
+                qDebug() << "Failed to create directory:" << fullPath;
+            }
         } else {
             QFile file(fullPath);
             QDir().mkpath(QFileInfo(fullPath).absolutePath());
@@ -114,7 +118,9 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
             char buffer[8192];
             int readBytes;
             while ((readBytes = unzReadCurrentFile(zipfile, buffer, sizeof(buffer))) > 0) {
-                file.write(buffer, readBytes);
+                if (file.write(buffer, readBytes) != readBytes) {
+                    qDebug() << "Failed to write data to file:" << fullPath;
+                }
             }
 
             file.close();
@@ -131,5 +137,5 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
     }
 
     unzClose(zipfile);
-    qDebug() << "Unzipped successfully to:" << unzipDir.filePath(zipBaseName);
+    qDebug() << "Unzipped successfully to:" << unzipDir.absolutePath();
 }

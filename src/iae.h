@@ -52,7 +52,7 @@ public:
     [[nodiscard]] QQmlListProperty<Config> configs();
 
     Q_INVOKABLE void createProject(const QString& projectName, const QString& configName, const QStringList& programArgs, const QString& expectedOutput, const bool isArgsFile, const bool isOutputFile);
-    Q_INVOKABLE QString openFileDialog();
+    Q_INVOKABLE void saveProjectsToDatabase();
     Q_INVOKABLE void Initialize();
     Q_INVOKABLE void saveConfig(QString configName, QString lang, QString compileParams);
     Q_INVOKABLE void saveProjects();

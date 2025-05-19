@@ -8,7 +8,7 @@ import iae
 ApplicationWindow {
     visible: true
     width: 1000
-    height: 700
+    height: 900
     title: "AssignCheck"
     color: "#f5f5f5"
 
@@ -17,6 +17,10 @@ ApplicationWindow {
 
     Component.onCompleted: {
             IAE.Initialize()
+    }
+
+    Component.onDestruction: {
+        IAE.saveProjectsToDatabase()
     }
 
     CreateNewConfiguration {
@@ -230,7 +234,7 @@ ApplicationWindow {
                                 id: zipFilePathField
                                 Layout.preferredWidth: 280
                                 placeholderText: "Choose project file..."
-                                text: fileDialogHelper.selectedFile
+                                text: zipDirectoryDialog.selectedFolder
                                 readOnly: false
                             }
                             Rectangle {
@@ -283,7 +287,7 @@ ApplicationWindow {
                         TextField {
                             id: programArgsField
                             Layout.preferredWidth: 280
-                            placeholderText: "e.g: Mark 2123, output.txt"
+                            placeholderText: "e.g: Mark 2123, params.txt"
                             readOnly: isArgsFile
                         }
 
@@ -380,8 +384,21 @@ ApplicationWindow {
                             isArgsFile,
                             isOutputFile
                         )
-                        isArgsFolder: false
-                        isOutputFolder: false
+                        isOutputFile = false
+                        isOutputFile = false
+                    }
+                }
+
+                Button {
+                    text: "Reset"
+                    onClicked: {
+                        projectNameField.text = ""
+                        configComboBox.currentIndex = -1
+                        programArgsField.text = ""
+                        expectedOutputField.text = ""
+                        zipFilePathField.text = ""
+                        isArgsFile = false
+                        isOutputFile = true
                     }
                 }
 
@@ -393,6 +410,7 @@ ApplicationWindow {
             }*/
 
             GroupBox {
+                id: projectsGroup
                 title: "Projects"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -400,19 +418,17 @@ ApplicationWindow {
                 ColumnLayout {
                     anchors.fill: parent
 
-                    RowLayout {
+                    Rectangle {
+                        id: projectNameHeader
                         Layout.fillWidth: true
-                        spacing: 1
-                        Rectangle {
-                            color: "#dcdcdc"
-                            Layout.fillWidth: true
-                            height: 40
-                            border.color: "black"
-                            Text { anchors.centerIn: parent; text: "Project Name"; }
-                        }
+                        height: 40
+                        color: "#dcdcdc"
+                        border.color: "black"
+                        Text { anchors.centerIn: parent; text: "Project Name"; }
                     }
 
                     ListView {
+                        id: projectView
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         model: IAE.projects
@@ -420,7 +436,8 @@ ApplicationWindow {
                         delegate: RowLayout {
                             spacing: 1
                             Rectangle {
-                                Layout.preferredWidth: 938
+                                Layout.preferredWidth: projectNameHeader.width
+                                Layout.alignment: Qt.AlignCenter
                                 height: 30
                                 color: "white"
                                 border.color: "#cccccc"
@@ -430,38 +447,49 @@ ApplicationWindow {
                                     anchors.fill: parent
                                     onClicked: {
                                         studentDialog.projectName = modelData.projectName
+                                        studentDialog.expectedOutput = modelData.expectedOutput
                                         studentDialog.studentModel = modelData.students
                                         studentDialog.visible = true
                                     }
                                 }
                             }
                         }
+
+                        Connections {
+                            target: IAE
+                            function onProjectsChanged() {
+                                projectView.model = IAE.projects;
+                            }
+                        }
                     }
 
                     Dialog {
                         id: studentDialog
-                        title: "Students in Project"
+                        title: "Project: " + studentDialog.projectName
                         width: 800
                         height: 400
                         modal: true
                         visible: false
+                        anchors.centerIn: parent
 
                         property string projectName: ""
+                        property string expectedOutput: ""
                         property var studentModel: null
 
                         ColumnLayout {
                             anchors.fill: parent
                             spacing: 10
 
-                            Label {
-                                text: "Project: " + studentDialog.projectName
-                                font.bold: true
-                                font.pixelSize: 16
-                            }
-
                             ScrollView {
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
+                                clip: true
+
+                                ScrollBar.vertical: ScrollBar {
+                                    policy: ScrollBar.AlwaysOn
+                                    anchors.right: parent.right
+                                    height: parent.height * 0.8
+                                }
 
                                 ListView {
                                     Layout.fillWidth: true
@@ -498,11 +526,24 @@ ApplicationWindow {
                                 }
                             }
 
-                            Button {
-                                text: "Close"
-                                Layout.alignment: Qt.AlignRight
-                                onClicked: studentDialog.visible = false
-                            }
+                           RowLayout {
+                               Layout.alignment: Qt.AlignRight
+                               spacing: 10
+
+                               Button {
+                                   text: "Expected Output"
+                                   Layout.preferredWidth: 150
+                                   onClicked: {
+                                       expectedOutput.text = studentDialog.expectedOutput
+                                       expectedOutput.visible = true
+                                   }
+                               }
+
+                               Button {
+                                   text: "Close"
+                                   onClicked: studentDialog.visible = false
+                               }
+                           }
                         }
                     }
                 }
@@ -602,6 +643,52 @@ ApplicationWindow {
         title: "Select the directory of the project"
         onAccepted: {
             zipFilePathField.text = selectedFolder.toString().substring(8)
+        }
+    }
+
+    Dialog {
+        id: expectedOutput
+        anchors.centerIn: parent
+        title: "Expected Output"
+        modal: true
+        width: 400
+        height: 200
+        visible: false
+        property string text: ""
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: "white"
+                border.color: "#cccccc"
+                radius: 4
+
+
+                TextField {
+                    anchors.fill: parent
+                    color: "black"
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+                    text: expectedOutput.text
+                    wrapMode: TextEdit.Wrap
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignTop
+                    readOnly: true
+                    selectByMouse: true
+                    cursorVisible: true
+                }
+            }
+
+            Button {
+                text: "Close"
+                Layout.alignment: Qt.AlignRight
+                onClicked: expectedOutput.visible = false
+            }
         }
     }
 }

@@ -9,8 +9,8 @@ import iae 1.0
 Dialog {
     id: editConfigDialog
     title: "Edit Existing Configuration"
-    width: 400
-    height: 350
+    width: 430
+    height: 400
     modal: true
     anchors.centerIn: parent
 
@@ -20,50 +20,44 @@ Dialog {
     signal configUpdated(string oldConfigName, string newConfigName, string language, string compilerPath)
 
     property string oldConfigName: ""
-
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
         anchors.margins: 20
 
-        TextField {
-            id: searchField
-            placeholderText: "Search configurations..."
+        ScrollView {
             Layout.fillWidth: true
-            onTextChanged: filterText = text
-        }
+            implicitHeight: 70
 
-        ListView {
-            id: listView
-            visible: searchField.activeFocus || searchField.text.length > 0
-            Layout.fillWidth: true
-            Layout.preferredHeight: 100
-            clip: true
+            ListView {
+                id: listView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
 
-            model: configModel.filter(c => c.name.toLowerCase().includes(filterText.toLowerCase()))
+                model: configModel
 
-            delegate: Rectangle {
-                width: listView.width
-                height: 20
-                color: ListView.isCurrentItem ? "#a0a0a0" : "#f0f0f0"
-                border.color: "#cccccc"
+                delegate: Rectangle {
+                    width: listView.width
+                    height: 20
+                    color: ListView.isCurrentItem ? "#a0a0a0" : "#f0f0f0"
+                    border.color: "#cccccc"
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        listView.currentIndex = index
-                        configNameField.text = modelData.name
-                        languageComboBox.currentIndex = languageComboBox.model.indexOf(modelData.language)
-                        compileParamsField.text = modelData.compileParams
-                        oldConfigName = modelData.name
-                        searchField.text = modelData.name
-                        searchField.focus = false
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            listView.currentIndex = index
+                            configNameField.text = modelData.name
+                            languageComboBox.currentIndex = languageComboBox.model.indexOf(modelData.language)
+                            compileParamsField.text = modelData.compileParams
+                            oldConfigName = modelData.name
+                        }
                     }
-                }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: modelData.name
+                    Text {
+                        anchors.centerIn: parent
+                        text: modelData.name
+                    }
                 }
             }
         }

@@ -10,9 +10,19 @@ QString Project::getProjectName() const {
     return m_projectName;
 }
 
+QString Project::getExpectedOutput() const {
+    return m_expectedOutput;
+}
+
 void Project::setProjectName(const QString &projectName) {
     if (m_projectName != projectName) {
         m_projectName = projectName;
+    }
+}
+
+void Project::setExpectedOutput(const QString& expectedOutput) {
+    if (m_expectedOutput != expectedOutput) {
+        m_expectedOutput = expectedOutput;
     }
 }
 

@@ -14,35 +14,10 @@
 #include <utility>
 #include <QFileDialog>
 #include <QSqlError>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 
-/*
-TODO: x-y | x = is logic done, y = is it implemented
--- Link projects with config +:-
-they will not be linked with configs, upon compilation and running, the method will take
-the config and projectConfig as parameters and use them, when the method completes its job,
-configs are not needed since they will not be shown anywhere. All the necessary info will be
-included in the student objects.
--- Config creation steps via gui +:-
-Create an object, fill the fields using gui inputs, add to the list if user wants to save.
--- Import export config +:
-Export will take a file path(probably using file dialog), then it can be saved using already
-existing methods. Importing works the same.
--- Select path for config storage ~:-
-Not critical
--- Compiler logic, handling files -:-
--- Project creation with additional fields from gui +:-
-They will be created using textfield inputs as args
--- Project save/load +:-
-In db, students will be seperated with project names, all content will be parsed to
-import students and their results.
--- CHECK WINDOWS COMPATIBILITY +:-
-POLICE STEADY WATCHING ME, EVERY DAY THEY CLOCKING ME
-RED ALERT, ARMED AND DANGEROUS, I KEEP THAT GLOCK ON ME
--- Gui integration +:-
--- Unzipping logic for folder handling -:-
-Our dearest friend kocakalp will solve this. Bless his soul <3.
--- Find a way to deploy the project on w10 -:-
-*/
 
 class iaeBackend {
 public:
@@ -52,12 +27,9 @@ public:
 
 IAE::IAE(QObject *parent) : QObject(parent), iae(std::make_unique<iaeBackend>()) {} //constructor
 
-QString IAE::openFileDialog() {
-    return QFileDialog::getOpenFileName(nullptr, "Select File", "", "All Files (*.*)");
-}
-
 IAE::~IAE() { //destructor , todo
     std::cout << "hello!";
+    saveProjectsToDatabase();
 
 }
 
@@ -68,35 +40,70 @@ void IAE::isEmpty() {
 
 void IAE::Initialize() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("example.db");
+    db.setDatabaseName("iae.db");
 
     if (!db.open()) {
-        qWarning() << "Failed to open database:" << db.lastError().text();
+        qDebug() << "Error: Connection with database failed:" << db.lastError().text();
         return;
-    } else {
-        qDebug() << "Database connection opened successfully.";
     }
+    qDebug() << "Database connection established";
 
     QSqlQuery query;
-    if (!query.exec("CREATE TABLE IF NOT EXISTS Students ("
-                    "studentId TEXT PRIMARY KEY, "
-                    "result TEXT, "
-                    "success INTEGER, "
-                    "projectId INTEGER)")) {
-        qWarning() << "Failed to create Students table:" << query.lastError().text();
-                    }
+    const QString createTable = "CREATE TABLE IF NOT EXISTS Projects ("
+                                "projectName TEXT, "
+                                "expectedOutput TEXT,"
+                                "studentID TEXT, "
+                                "result TEXT, "
+                                "success INTEGER, "
+                                "PRIMARY KEY (projectName, studentID))";
 
-    if (!query.exec("CREATE TABLE IF NOT EXISTS Projects ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "name TEXT, "
-                    "studentId TEXT, "
-                    "FOREIGN KEY(studentId) REFERENCES Students(studentId))")) {
-        qWarning() << "Failed to create Projects table:" << query.lastError().text();
-                    }
+    if (!query.exec(createTable)) {
+        qDebug() << "Error: table creation failed:" << query.lastError().text();
+        return;
+    }
+
+    const QString selectQuery = "SELECT projectName, expectedOutput, studentID, result, success FROM Projects";
+    if (!query.exec(selectQuery)) {
+        qDebug() << "Error: failed to execute select query:" << query.lastError().text();
+        return;
+    }
+
+    QMap<QString, QList<Student*>> projectStudentsMap;
+    QMap<QString, QString> projectExpectedOutputs;
+
+    while (query.next()) {
+        QString projectName = query.value("projectName").toString();
+        QString expectedOutput = query.value("expectedOutput").toString();
+        QString studentID = query.value("studentID").toString();
+        QString result = query.value("result").toString();
+        bool success = query.value("success").toBool();
+
+        Student* student = new Student(studentID, result, success);
+        projectStudentsMap[projectName].append(student);
+
+        // Store the expected output for the project
+        if (!projectStudentsMap.contains(projectName)) {
+            projectStudentsMap[projectName] = QList<Student*>();
+        }
+        projectStudentsMap[projectName].append(student);
+        projectExpectedOutputs[projectName] = expectedOutput;
+    }
+
+    for (auto it = projectStudentsMap.begin(); it != projectStudentsMap.end(); ++it) {
+        Project* project = new Project(it.key());
+        project->setExpectedOutput(projectExpectedOutputs[it.key()]); // Set expected output
+        for (Student* student : it.value()) {
+            project->addStudent(student);
+        }
+
+        iae->m_projects.append(project);
+    }
+
+    qDebug() << "Projects and students loaded into m_projects.";
+    Q_EMIT projectsChanged();
 
     const QString folderPath = QDir::currentPath() + "/configs";
     loadConfigs(folderPath);
-    loadProjects();
 }
 
 QVariantList IAE::getConfigsAsVariantList() const {
@@ -349,16 +356,6 @@ void IAE::saveProjects() {
     qDebug() << "Projects saved through IAE::saveProjects.";
 }
 
-void IAE::loadProjects() {
-    if (!iae) {
-        qWarning() << "iaeBackend not initialized.";
-        return;
-    }
-
-    iae->m_projects = SQLite::loadProjects();
-    qDebug() << "Projects loaded into iae->m_projects.";
-}
-
 QQmlListProperty<Project> IAE::projects() {
     return {this,&iae->m_projects};
 }
@@ -416,8 +413,51 @@ void IAE::createProject(const QString& projectName, const QString& configName, c
         QString projectPath = QDir::currentPath() + "/unzip/" + projectName;
         Project* project = handler.compileAndRunAllFiles(projectName, projectPath, conf->m_lang, conf->m_compileParams, mutableProgramArgs, mutableExpectedOutput);
         if (project != nullptr) {
+            project->setExpectedOutput(mutableExpectedOutput);
             iae->m_projects.append(project);
             Q_EMIT projectsChanged();
             qDebug() << "Projects created:" << project->getProjectName();
         }
+}
+
+void IAE::saveProjectsToDatabase() {
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid()) {
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName("iae.db");
+        if (!db.open()) {
+            qWarning() << "Failed to open database connection:" << db.lastError().text();
+            return;
+        }
+    }
+    if (!db.isOpen()) {
+        qWarning() << "Database is not open. Cannot save projects.";
+        return;
+    }
+
+    QSqlQuery query;
+    const QString insertQuery = "INSERT OR REPLACE INTO Projects (projectName, expectedOutput, studentID, result, success) "
+                                "VALUES (:projectName, :expectedOutput, :studentID, :result, :success)";
+
+    for (Project* project : iae->m_projects) {
+        QString projectName = project->getProjectName();
+        QString expectedOutput = project->getExpectedOutput();
+        QQmlListProperty<Student> students = project->getStudents();
+
+        for (int i = 0; i < students.count(&students); ++i) {
+            Student* student = students.at(&students, i);
+
+            query.prepare(insertQuery);
+            query.bindValue(":projectName", projectName);
+            query.bindValue(":expectedOutput", expectedOutput);
+            query.bindValue(":studentID", student->getStudentID());
+            query.bindValue(":result", student->getResult());
+            query.bindValue(":success", student->isSuccess());
+            if (!query.exec()) {
+                qWarning() << "Failed to insert student into database:" << query.lastError().text();
+            }
+        }
+    }
+
+    qDebug() << "Projects, expected outputs, and students saved to database.";
 }

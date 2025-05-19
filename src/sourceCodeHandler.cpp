@@ -25,6 +25,7 @@ Project* sourceCodeHandler::compileAndRunAllFiles(const QString& projectName, co
 
     Project* m_project = new Project(projectName);
 
+
     // Get all source files in the directory and its subdirectories based on the language type
     QStringList filePaths;
     const QString l_language = language.toLower();
@@ -50,7 +51,8 @@ Project* sourceCodeHandler::compileAndRunAllFiles(const QString& projectName, co
 
     QList<QFuture<void>> futures;
     for (const QString& file : filePaths) {
-        Student* student = new Student(QFileInfo(file).fileName(), "", false);
+        QString zipBaseName = QFileInfo(file).absolutePath().split('/').at(QFileInfo(file).absolutePath().split('/').size() - 2);
+        Student* student = new Student(zipBaseName, "", false);
         m_project->addStudent(student);
 
         futures.append(QtConcurrent::run([=]() {

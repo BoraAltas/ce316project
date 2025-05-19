@@ -68,7 +68,12 @@ Dialog {
             Button {
                 text: "Cancel"
                 Layout.preferredWidth: 80
-                onClicked: createConfigDialog.close()
+                onClicked: {
+                    configNameField.text = "";
+                    compilerParamsField.text = "";
+                    languageComboBox.currentIndex = -1
+                    createConfigDialog.close()
+                }
             }
             Button {
                 text: "Create"
@@ -80,6 +85,9 @@ Dialog {
                         languageComboBox.currentText,
                         compilerParamsField.text
                     )
+                    configNameField.text = "";
+                    compilerParamsField.text = "";
+                    languageComboBox.currentIndex = -1
                     createConfigDialog.close()
                 }
             }
