@@ -28,8 +28,6 @@ void ZipHandler::setProjectName(const QString &name) {
     }
 }
 
-
-
 void ZipHandler::openFileDialog() {
     QString folder = QFileDialog::getExistingDirectory(nullptr, "Select Folder Containing Zip Files", "");
     if (folder.isEmpty()) {
@@ -53,26 +51,20 @@ void ZipHandler::openFileDialog() {
     }
 }
 
-
 void ZipHandler::unzipFile(const QString &zipFilePath) {
     if (m_projectName.isEmpty()) {
         qWarning() << "Project name not set. Aborting unzip.";
         return;
     }
 
-    // Zip dosyasının adı (örneğin: Alp.zip → Alp)
     QString zipBaseName = QFileInfo(zipFilePath).baseName();
 
-    // Hedef klasör: src/unzip/projectName/zipBaseName/
     QDir unzipDir(QDir::currentPath() + "/unzip/");
-    if (!unzipDir.exists()) {
-        if (!unzipDir.mkpath(".")) {
-            qDebug() << "Failed to create target directory:" << unzipDir.absolutePath();
-            return;
-        }
+    if (!unzipDir.exists() && !unzipDir.mkpath(".")) {
+        qDebug() << "Failed to create target directory:" << unzipDir.absolutePath();
+        return;
     }
 
-    // Zip dosyasını aç
     unzFile zipfile = unzOpen(zipFilePath.toStdString().c_str());
     if (!zipfile) {
         qDebug() << "Cannot open zip file:" << zipFilePath;
@@ -98,16 +90,13 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
 
         QString relativePath = QString::fromUtf8(filename);
 
-        // MacOS sistem dosyalarını atla
-        if (relativePath.startsWith("__MACOSX") || relativePath.contains("/__MACOSX")) {
+        if (relativePath.startsWith("_MACOSX") || relativePath.contains("/_MACOSX")) {
             qDebug() << "Skipping system folder:" << relativePath;
             continue;
         }
 
-        // Gerçek dosya yolu: src/unzip/projectName/zipBaseName/...
         QString fullPath = unzipDir.filePath(zipBaseName + "/" + relativePath);
 
-        // Klasör mü dosya mı?
         if (filename[strlen(filename) - 1] == '/') {
             QDir().mkpath(fullPath);
         } else {
@@ -137,7 +126,6 @@ void ZipHandler::unzipFile(const QString &zipFilePath) {
             unzCloseCurrentFile(zipfile);
         }
 
-        // Sonraki dosyaya geç
         if ((i + 1) < global_info.number_entry) {
             if (unzGoToNextFile(zipfile) != UNZ_OK) {
                 qDebug() << "Could not go to next file.";
